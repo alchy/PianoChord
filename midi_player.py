@@ -8,6 +8,7 @@ import mido
 import time
 import threading
 from typing import List
+from constants import MusicalConstants  # NOVÉ: Pro MIDI_VELOCITY
 
 DEBUG = True
 
@@ -40,10 +41,11 @@ class MidiPlayer:
         except Exception as e:
             raise ValueError(f"Chyba při otevírání MIDI portu '{self.port_name}': {str(e)}")
 
-    def play_chord(self, midi_notes: List[int], duration: float = 1.0, velocity: int = 100):
+    def play_chord(self, midi_notes: List[int], duration: float = 1.0, velocity: int = MusicalConstants.MIDI_VELOCITY):
         """
         Přehraje akord (seznam MIDI not) na danou dobu.
         Používá threading pro non-blocking operaci.
+        Velocity z konstanty (default 64, pro snížení hlasitosti).
         """
         if not self.outport:
             raise ValueError("MIDI port není otevřen.")
