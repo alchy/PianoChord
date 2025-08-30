@@ -6,10 +6,18 @@ Tento soubor obsahuje základní hudební data a funkce pro práci s notami a ak
 
 from typing import List
 from functools import lru_cache
+import logging  # NOVÉ: Pro lepší logování místo print
 
 # --- DEBUG --- (centralizováno zde, lze importovat jinde)
 DEBUG = True
 
+# NOVÉ: Inicializace loggeru pro celou appku (optimalizace pro čitelnost a sledovatelnost)
+logging.basicConfig(
+    level=logging.DEBUG if DEBUG else logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    filename='app.log',  # NOVÉ: Logování do souboru pro persistenci (nová možnost)
+    filemode='a'  # Append mode, aby se logy nepřepisovaly
+)
 
 class MusicalConstants:
     """Hudebni konstanty pouzivane v aplikaci."""

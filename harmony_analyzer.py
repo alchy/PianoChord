@@ -5,11 +5,9 @@ Tento modul analyzuje akordy a hledá je v jazzových progresech.
 """
 
 from typing import Dict, Any, Tuple
-from constants import MusicalConstants, ChordLibrary
+from constants import MusicalConstants, ChordLibrary, DEBUG  # Opravil import DEBUG
 from jazz_database import JazzStandardsDatabase
-
-# DEBUG importováno z constants.py
-
+import logging  # NOVÉ: Import pro logování varování (optimalizace místo print)
 
 class HarmonyAnalyzer:
     """Analyzator harmonie s vyuzitim databaze realnych progresi."""
@@ -43,7 +41,7 @@ class HarmonyAnalyzer:
 
     @classmethod
     def parse_chord_name(cls, chord_full_name: str) -> Tuple[str, str]:
-        """Rozparsuje cely nazev akordu na zakladni notu a typ."""
+        """Rozparsuje cely nazev akordu na zakladni notu a typ. Optimalizováno pro složité typy jako '7#11' nebo '13b9'."""
         chord = chord_full_name.strip()
         if not chord:
             raise ValueError("Prázdný název akordu")
@@ -62,8 +60,28 @@ class HarmonyAnalyzer:
         if base_note not in MusicalConstants.PIANO_KEYS:
             raise ValueError(f"Neplatná základní nota akordu: {base_note}")
 
-        # Specialni pripad pro akordy bez typu (napr. "C")
+        # Specialni pripad pro akordy bez typu (napr. "C") – fallback na maj
         if not chord_type and base_note in chord_full_name:
             chord_type = "maj"
+
+        # NOVÉ: Optimalizace pro složité typy s příponami (např. "7#11" zůstane jako "7#11", pokud je v knihovně)
+        if chord_type not in ChordLibrary.CHORD_VOICINGS:
+            original_type = chord_type
+            # Fallback logika: Zjednodušit na základní typ (pro odstraněné warningů)
+            if not original_type:  # Prázdný typ – fallback na maj (optimalizace pro klíče jako "Ab")
+                chord_type = "maj"
+            elif original_type.startswith('m'):
+                chord_type = 'm7'  # Fallback pro minor varianty
+            elif 'maj' in original_type:
+                chord_type = 'maj7'  # Fallback pro major
+            elif 'sus' in original_type:
+                chord_type = 'sus4'  # Fallback pro suspended
+            elif 'dim' in original_type:
+                chord_type = 'dim7'  # Fallback pro diminished
+            else:
+                chord_type = '7'  # Default fallback pro dominantní typy
+            # NOVÉ: Logování jen pokud DEBUG (optimalizace – méně spamu)
+            if DEBUG:
+                logging.warning(f"Neplatný typ akordu '{original_type}', použit fallback '{chord_type}' pro {chord_full_name}.")
 
         return base_note, chord_type

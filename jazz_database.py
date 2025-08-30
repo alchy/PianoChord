@@ -14,56 +14,75 @@ class JazzStandardsDatabase:
     """Databaze jazzovych standardu a jejich progresi."""
 
     JAZZ_STANDARDS = {
+        # --- Classic Easy / Medium ---
         "Fly Me to the Moon": {
-            "key": "C", "composer": "Bart Howard", "year": 1954, "difficulty": "Easy-Medium",
+            "key": "C", "composer": "Bart Howard", "year": 1954, "difficulty": "Easy - Medium",
             "progressions": [
                 {"chords": ["Am7", "Dm7", "G7", "Cmaj7"], "description": "vi-ii-V-I hlavní progrese"},
-                {"chords": ["Fmaj7", "Bm7b5", "E7", "Am7"], "description": "IV-viiø-III7-vi modulace do vi"},
+                {"chords": ["Fmaj7", "Bm7b5", "E7", "Am7"], "description": "IV-viiø-III7-vi modulace do vi"}
             ]
         },
         "Autumn Leaves": {
             "key": "Gm", "composer": "Joseph Kosma", "year": 1945, "difficulty": "Easy-Medium",
             "progressions": [
-                {"chords": ["Cm7", "F7", "Bbmaj7", "Ebmaj7"], "description": "ii-V-I-IV v Bb dur (relativní dur)"},
-                {"chords": ["Am7b5", "D7", "Gm"], "description": "iiø-V-i v G moll"},
+                {"chords": ["Cm7", "F7", "Bbmaj7", "Ebmaj7"], "description": "ii-V-I-IV v Bb dur"},
+                {"chords": ["Am7b5", "D7", "Gm"], "description": "iiø-V-i v G moll"}
             ]
         },
+        "Summertime": {
+            "key": "Am", "composer": "George Gershwin", "year": 1935, "difficulty": "Easy",
+            "progressions": [
+                {"chords": ["Am", "E7", "Am", "E7"], "description": "i-V-i"},
+                {"chords": ["Dm7", "G7", "C", "F"], "description": "iv-VII7-III-VI in relative major"}
+            ]
+        },
+        "Georgia (On My Mind)": {
+            "key": "F", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
+            "progressions": [
+                {"chords": ["F", "Am7", "Dm7", "G7", "C7", "F"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
+                {"chords": ["Bbmaj7", "Bdim7", "C7", "F"], "description": "IV-#iio7-V-I turnaround"}
+            ]
+        },
+
+        # --- Medium / Bebop ---
         "All The Things You Are": {
             "key": "Ab", "composer": "Jerome Kern", "year": 1939, "difficulty": "Medium-Advanced",
             "progressions": [
                 {"chords": ["Fm7", "Bbm7", "Eb7", "Abmaj7"], "description": "vi-ii-V-I v Ab dur"},
                 {"chords": ["Dbmaj7", "G7", "Cmaj7"], "description": "IV-VII7-III modulace do C dur"},
-                {"chords": ["Am7", "D7", "Gmaj7"], "description": "ii-V-I v G dur (bridge)"},
+                {"chords": ["Am7", "D7", "Gmaj7"], "description": "ii-V-I v G dur (bridge)"}
             ]
         },
         "Blue Bossa": {
             "key": "Cm", "composer": "Kenny Dorham", "year": 1963, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["Cm7", "Fm7", "Dm7b5", "G7", "Cm7"], "description": "i-iv-iiø-V-i v C moll"},
-                {"chords": ["Ebm7", "Ab7", "Dbmaj7"], "description": "ii-V-I v Db dur"},
-            ]
-        },
-        "Giant Steps": {
-            "key": "B", "composer": "John Coltrane", "year": 1959, "difficulty": "Very Advanced",
-            "progressions": [
-                {"chords": ["Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7"],
-                 "description": "Coltrane changes - terciové vztahy"},
-                {"chords": ["Am7", "D7", "Gmaj7"], "description": "ii-V-I v G dur"},
-                {"chords": ["C#m7", "F#7", "Bmaj7"], "description": "ii-V-I v B dur"},
+                {"chords": ["Ebm7", "Ab7", "Dbmaj7"], "description": "ii-V-I v Db dur"}
             ]
         },
         "Take The A Train": {
             "key": "C", "composer": "Billy Strayhorn", "year": 1939, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["Cmaj7", "Cmaj7", "D7", "D7"], "description": "Bridge modulace"},
-                {"chords": ["Dm7", "G7", "Cmaj7", "A7"], "description": "ii-V-I-VI7 turnaround"},
+                {"chords": ["Dm7", "G7", "Cmaj7", "A7"], "description": "ii-V-I-VI7 turnaround"}
             ]
         },
         "Satin Doll": {
             "key": "C", "composer": "Duke Ellington", "year": 1953, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["Dm7", "G7", "Dm7", "G7"], "description": "Opakující se ii-V"},
-                {"chords": ["Em7", "A7", "Dm7", "G7"], "description": "iii-VI7-ii-V prodloužení"},
+                {"chords": ["Em7", "A7", "Dm7", "G7"], "description": "iii-VI7-ii-V prodloužení"}
+            ]
+        },
+
+        # --- Advanced / Modern Jazz ---
+        "Giant Steps": {
+            "key": "B", "composer": "John Coltrane", "year": 1959, "difficulty": "Very Advanced",
+            "progressions": [
+                {"chords": ["Bmaj7", "D7", "Gmaj7", "Bb7", "Ebmaj7"],
+                 "description": "Coltrane changes - terciové vztahy"},
+                {"chords": ["Am7", "D7", "Gmaj7"], "description": "ii-V-I v G dur"},
+                {"chords": ["C#m7", "F#7", "Bmaj7"], "description": "ii-V-I v B dur"}
             ]
         },
         "Stella by Starlight": {
@@ -82,38 +101,31 @@ class JazzStandardsDatabase:
                 {"chords": ["Cm", "Eb7", "Abmaj7", "D7b9"], "description": "i-III-VI-II7 turnaround"}
             ]
         },
-        "Summertime": {
-            "key": "Am", "composer": "George Gershwin", "year": 1935, "difficulty": "Easy",
+
+        # --- Bill Evans ---
+        "Waltz for Debby": {
+            "key": "Bb", "composer": "Bill Evans", "year": 1961, "difficulty": "Medium-Advanced",
             "progressions": [
-                {"chords": ["Am", "E7", "Am", "E7"], "description": "Basic i-V-i progression"},
-                {"chords": ["Dm7", "G7", "C", "F"], "description": "iv-VII7-III-VI in relative major"},
-                {"chords": ["Am", "Dm", "Am", "E7"], "description": "i-iv-i-V cycle"}
+                {"chords": ["Bbmaj7", "Gm7", "C7", "Fmaj7"], "description": "Lyrická progrese s ii-V-I"},
+                {"chords": ["Ebmaj7", "Am7b5", "D7", "Gm7"], "description": "Modulační část s chromatickou přechodovou"}
             ]
         },
-        "Body and Soul": {
-            "key": "Db", "composer": "Johnny Green", "year": 1930, "difficulty": "Medium",
+        "Peace Piece": {
+            "key": "C", "composer": "Bill Evans", "year": 1958, "difficulty": "Advanced",
             "progressions": [
-                {"chords": ["Ebmaj7", "Ab7", "Dbmaj7", "Dbmaj7"], "description": "ii-V-I in Db maj"},
-                {"chords": ["Ebm7", "Ab7", "Dbmaj7", "B7"], "description": "ii-V-I with turnaround to bridge"},
-                {"chords": ["Bbm7", "Eb7", "Abmaj7", "G7"], "description": "Bridge: ii-V-I in Ab, then V/ii"}
+                {"chords": ["Cmaj7", "G9sus4", "Am7", "Fmaj7"], "description": "Volná improvizační sekvence"},
+                {"chords": ["Dm7", "G13", "Cmaj7"], "description": "ii-V-I loop"}
             ]
         },
-        "Night and Day": {
-            "key": "Eb", "composer": "Cole Porter", "year": 1932, "difficulty": "Medium",
+        "Blue in Green": {
+            "key": "Db", "composer": "Bill Evans", "year": 1959, "difficulty": "Advanced",
             "progressions": [
-                {"chords": ["Eb", "Fm7", "Bb7", "Eb"], "description": "I-ii-V-I basic progression"},
-                {"chords": ["Gbm7b5", "Fm7", "Em7", "Ebm7"],
-                 "description": "Chromatic descending half-diminished chords"},
-                {"chords": ["Dm7", "G7", "Cm7", "F7"], "description": "Bridge: ii-V-ii-V in Bb"}
+                {"chords": ["Dbmaj7", "Em7b5", "A7b9", "Dbmaj7"], "description": "Modulační chromatika"},
+                {"chords": ["Gm7", "C7", "Fmaj7"], "description": "ii-V-I loop"}
             ]
         },
-        "Georgia (On My Mind)": {
-            "key": "F", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
-            "progressions": [
-                {"chords": ["F", "Am7", "Dm7", "G7", "C7", "F"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
-                {"chords": ["Bbmaj7", "Bdim7", "C7", "F"], "description": "IV-#iio7-V-I turnaround"}
-            ]
-        },
+
+        # --- Michel Petrucciani ---
         "Looking Up": {
             "key": "C", "composer": "Michel Petrucciani", "year": 1980, "difficulty": "Medium-Advanced",
             "progressions": [
@@ -135,6 +147,22 @@ class JazzStandardsDatabase:
                 {"chords": ["Fmaj7", "Em7", "A7", "Dm7"], "description": "Modulační sekvence s chromatickými přechody"}
             ]
         },
+
+        # --- Blues / Bebop ---
+        "C Jam Blues": {
+            "key": "C", "composer": "Duke Ellington", "year": 1942, "difficulty": "Easy-Medium",
+            "progressions": [
+                {"chords": ["C7", "F7", "C7", "G7"], "description": "12-taktový bluesový základ"}
+            ]
+        },
+        "Now's the Time": {
+            "key": "F", "composer": "Charlie Parker", "year": 1945, "difficulty": "Medium-Advanced",
+            "progressions": [
+                {"chords": ["F7", "Bb7", "F7", "C7"], "description": "Bebop bluesová sekvence"}
+            ]
+        },
+
+        # --- ii-V-I Variace ---
         "ii-V-I Dur základní": {
             "key": "C", "difficulty": "Easy",
             "progressions": [
