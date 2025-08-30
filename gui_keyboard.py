@@ -1,14 +1,16 @@
-# piano_keyboard.py
+# gui_keyboard.py
 """
-piano_keyboard.py - Vizuální komponenta klaviatury.
+gui_keyboard.py - Vizuální komponenta klaviatury pro GUI.
+Obsahuje třídy pro kreslení kláves a klaviatury.
 """
+
 import tkinter as tk
 from typing import List, Tuple
 
 from constants import MusicalConstants
 
-# --- DEBUG ---
-DEBUG = False  # Zde je debug vypnut, aby se nezaspamoval terminal pri kresleni
+# DEBUG importováno z constants.py (pokud potřeba, ale zde vypnuto pro méně spamu)
+DEBUG = False
 
 
 class PianoKey:
@@ -42,7 +44,7 @@ class PianoKey:
 
 
 class ArchetypeKeyboard:
-    """Hlavni trida pro kresleni a ovladani klaviatury."""
+    """Hlavni trida pro kresleni a ovladani klaviatury v GUI."""
 
     def __init__(self, canvas: tk.Canvas, nr_of_keys: int):
         self.canvas = canvas
@@ -86,3 +88,8 @@ class ArchetypeKeyboard:
     def clear_highlights(self):
         """Odebere zvyrazneni ze vsech klaves."""
         self.draw()
+
+    @property
+    def total_width(self) -> int:
+        """Vrati celkovou sirku klaviatury pro centrovani v GUI."""
+        return 52 * MusicalConstants.WHITE_KEY_WIDTH  # 52 bílých kláves na 88-klávesové klaviatuře

@@ -1,13 +1,14 @@
 # harmony_analyzer.py
 """
 harmony_analyzer.py - Analyza harmonie a progresi.
+Tento modul analyzuje akordy a hledá je v jazzových progresech.
 """
+
 from typing import Dict, Any, Tuple
 from constants import MusicalConstants, ChordLibrary
 from jazz_database import JazzStandardsDatabase
 
-# --- DEBUG ---
-DEBUG = True
+# DEBUG importováno z constants.py
 
 
 class HarmonyAnalyzer:
@@ -48,7 +49,7 @@ class HarmonyAnalyzer:
             raise ValueError("Prázdný název akordu")
 
         # Zpracovani nazvu noty (napr. C, C#, Db)
-        if len(chord) > 1 and chord[1] in ['#', 'b']:
+        if len(chord) > 1 and chord[1] in {'#', 'b'}:
             base_note = chord[:2]
             chord_type = chord[2:]
         else:

@@ -1,6 +1,6 @@
 # main.py
 import sys
-from piano_gui import PianoGUI
+from gui_main import PianoGUI
 
 # --- DEBUG ---
 # Urcuje, zda se budou vypisovat ladici informace.
