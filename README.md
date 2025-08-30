@@ -10,3 +10,12 @@
 - **Progresion player**: Nahrajte celou píseň nebo progrese, procházejte akordy šipkami nebo tlačítky.
 - **Log a export**: Zaznamenává všechny akce, umožňuje export do TXT nebo kopírování do schránky.
 - **Klávesové zkratky**: Enter pro analýzu, šipky pro procházení progrese.
+
+---
+
+## To make a bundle
+```
+pip install auto-py-to-exe
+pip install pyinstaller
+```
+```pyinstaller --noconfirm --onedir --windowed --hidden-import "mido.backends.rtmidi" --hidden-import "rtmidi"  "C:\Users\jindr\PycharmProjects\PianoChord\main.py"```
