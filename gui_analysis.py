@@ -1,108 +1,183 @@
 # gui_analysis.py
 """
-gui_analysis.py - Komponenty pro analýzu akordů v GUI.
-Obsahuje metody pro vytvoření analysis tabu, analýzu a zobrazení výsledků.
+gui_analysis.py - Refaktorované komponenty pro analýzu akordů v GUI.
+Zjednodušeno pro lepší čitelnost a údržbu.
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
-from typing import Dict, Any
+from tkinter import ttk
+from typing import Dict, Any, TYPE_CHECKING
+import logging
 
-from constants import ChordLibrary
-from harmony_analyzer import HarmonyAnalyzer
-from gui_keyboard import ArchetypeKeyboard
+if TYPE_CHECKING:
+    from main_window import MainWindow
 
-DEBUG = True
+logger = logging.getLogger(__name__)
 
 
 class AnalysisHandler:
-    """Třída pro zpracování analýzy v GUI. Oddělená pro lepší modularitu."""
+    """
+    Refaktorovaná třída pro zpracování analýzy v GUI.
+    Zodpovídá pouze za zobrazení výsledků analýzy.
+    """
 
-    def __init__(self, parent_gui):
-        self.parent_gui = parent_gui
-        self.chord_name_label = None
-        self.chord_notes_label = None
-        self.prog_tree = None
-        self.prog_tree_data = {}
+    def __init__(self, main_window: 'MainWindow'):
+        self.main_window = main_window
 
-    def create_analysis_tab(self, parent: ttk.Frame):
+        # GUI komponenty
+        self.chord_name_label: tk.Label = None
+        self.chord_notes_label: tk.Label = None
+        self.prog_tree: ttk.Treeview = None
+
+        # Data pro treeview
+        self.prog_tree_data: Dict[str, Dict[str, Any]] = {}
+
+    def create_analysis_tab(self, parent: ttk.Frame) -> None:
+        """Vytvoří tab pro analýzu akordů."""
         parent.rowconfigure(1, weight=1)
         parent.columnconfigure(0, weight=1)
-        chord_info_frame = ttk.Labelframe(parent, text="Chord Info", padding=10)
+
+        # Sekce s informacemi o akordu
+        self._create_chord_info_section(parent)
+
+        # Sekce s progresemi
+        self._create_progressions_section(parent)
+
+    def _create_chord_info_section(self, parent: ttk.Frame) -> None:
+        """Vytvoří sekci s informacemi o aktuálním akordu."""
+        chord_info_frame = ttk.Labelframe(parent, text="Informace o akordu", padding=10)
         chord_info_frame.grid(row=0, column=0, sticky="ew", pady=(0, 10))
-        self.chord_name_label = ttk.Label(chord_info_frame, text="Akord: -", font=("Segoe UI", 10, "bold"))
+
+        self.chord_name_label = ttk.Label(
+            chord_info_frame,
+            text="Akord: -",
+            font=("Segoe UI", 10, "bold")
+        )
         self.chord_name_label.pack(anchor="w")
+
         self.chord_notes_label = ttk.Label(chord_info_frame, text="Noty: -")
         self.chord_notes_label.pack(anchor="w")
-        prog_frame = ttk.Labelframe(parent, text="Real Progressions (from Jazz Standards)", padding=10)
+
+    def _create_progressions_section(self, parent: ttk.Frame) -> None:
+        """Vytvoří sekci se seznamem progresí."""
+        prog_frame = ttk.Labelframe(
+            parent,
+            text="Reálné progrese (z jazzových standardů)",
+            padding=10
+        )
         prog_frame.grid(row=1, column=0, sticky="nsew")
         prog_frame.rowconfigure(0, weight=1)
         prog_frame.columnconfigure(0, weight=1)
-        cols = ("Progression", "Description", "Song", "Transposed")
-        self.prog_tree = ttk.Treeview(prog_frame, columns=cols, show="headings")
-        for col in cols:
+
+        # Treeview pro progrese
+        columns = ("Progrese", "Popis", "Píseň", "Transpozice")
+        self.prog_tree = ttk.Treeview(prog_frame, columns=columns, show="headings")
+
+        # Nastavení sloupců
+        column_widths = {"Progrese": 200, "Popis": 250, "Píseň": 150, "Transpozice": 100}
+        for col in columns:
             self.prog_tree.heading(col, text=col)
-            self.prog_tree.column(col, width=150, anchor="w")
+            self.prog_tree.column(col, width=column_widths.get(col, 150), anchor="w")
+
         self.prog_tree.grid(row=0, column=0, sticky="nsew")
+
+        # Scrollbar pro treeview
         scrollbar = ttk.Scrollbar(prog_frame, orient="vertical", command=self.prog_tree.yview)
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.prog_tree.configure(yscrollcommand=scrollbar.set)
-        self.prog_tree.bind("<Double-1>", self._on_prog_double_click)
 
-    def analyze_harmony(self):
-        chord_full_name = self.parent_gui.chord_entry.get().strip()
-        if not chord_full_name:
-            messagebox.showwarning("Vstup", "Zadejte název akordu.")
-            return
+        # Event handler pro double-click
+        self.prog_tree.bind("<Double-1>", self._on_progression_double_click)
 
-        try:
-            base_note, chord_type = HarmonyAnalyzer.parse_chord_name(chord_full_name)
-            analysis = HarmonyAnalyzer.analyze(base_note, chord_type)
-            self.parent_gui.current_analysis = analysis
-            self._display_analysis_results(analysis)
-            self.parent_gui._display_chord(chord_full_name)
-            self.parent_gui._log(f"Analyzován akord: {chord_full_name}")
-        except ValueError as e:
-            messagebox.showerror("Chyba analýzy", str(e))
-            self.parent_gui._log(f"CHYBA analýzy: {e}")
-
-    def _display_analysis_results(self, analysis: Dict[str, Any]):
+    def display_analysis_results(self, analysis: Dict[str, Any]) -> None:
+        """
+        Zobrazí výsledky analýzy akordu v GUI.
+        Aktualizuje jak informace o akordu, tak seznam progresí.
+        """
+        # Aktualizace informací o akordu
         self.chord_name_label.config(text=f"Akord: {analysis['chord_name']}")
         self.chord_notes_label.config(text=f"Noty: {', '.join(analysis['chord_notes'])}")
 
+        # Vymazání předchozích progresí
+        self._clear_progressions()
+
+        # Naplnění nových progresí
+        self._populate_progressions(analysis["real_progressions"])
+
+        logger.debug(f"Zobrazeny výsledky analýzy pro akord: {analysis['chord_name']}")
+
+    def _clear_progressions(self) -> None:
+        """Vymaže všechny progrese z treeview."""
         for item in self.prog_tree.get_children():
             self.prog_tree.delete(item)
         self.prog_tree_data.clear()
 
-        for i, prog in enumerate(analysis["real_progressions"]):
-            transposed = f"By {prog.get('transposed_by', 0)} semitones" if prog.get('transposed_by', 0) > 0 else "Original"
+    def _populate_progressions(self, progressions: list) -> None:
+        """Naplní treeview progresemi."""
+        for prog in progressions:
+            # Formátování dat pro zobrazení
+            chords_str = " → ".join(prog["chords"])
+            transposed_str = self._format_transposition_info(prog)
+
             values = (
-                " ".join(prog["chords"]),
+                chords_str,
                 prog["description"],
                 prog["song"],
-                transposed
+                transposed_str
             )
-            iid = self.prog_tree.insert("", "end", values=values)
-            self.prog_tree_data[iid] = prog
 
-    def _on_prog_double_click(self, event):
-        """Obslouží double-click na progrese – načte do progression playeru a zobrazení prvního akordu."""
-        selected = self.prog_tree.selection()
-        if not selected:
+            # Vložení do treeview
+            item_id = self.prog_tree.insert("", "end", values=values)
+            self.prog_tree_data[item_id] = prog
+
+    def _format_transposition_info(self, prog: Dict[str, Any]) -> str:
+        """Formátuje informaci o transpozici."""
+        transposed_by = prog.get('transposed_by', 0)
+        if transposed_by > 0:
+            return f"+{transposed_by} půltónů"
+        else:
+            return "Originál"
+
+    def _on_progression_double_click(self, event) -> None:
+        """
+        Obslužná metoda pro double-click na progrese.
+        Nahraje vybranou progrese do progression playeru.
+        """
+        selected_items = self.prog_tree.selection()
+        if not selected_items:
             return
-        iid = selected[0]
-        prog_data = self.prog_tree_data.get(iid)
-        if prog_data:
-            chords = prog_data.get('chords', [])
-            if not chords:
-                self.parent_gui._log("Vybraná progrese nemá akordy – nic se nenačítá.")
-                return  # Optimalizace: Přeskoč prázdnou progrese
-            self.parent_gui._load_specific_progression(chords, prog_data['song'])
-            # NOVÉ: Zobraz první akord po načtení (oprava bugu pro zobrazení po výběru z analysis)
-            first_chord = chords[0]
-            self.parent_gui._display_chord(first_chord)
-            # Přehraj MIDI prvního akordu (pokud enabled) – pro okamžitou zpětnou vazbu
-            base_note, chord_type = HarmonyAnalyzer.parse_chord_name(first_chord)
-            midi_notes = ChordLibrary.get_root_voicing(base_note, chord_type)
-            self.parent_gui._play_current_chord(midi_notes, first_chord)
-            self.parent_gui._log(f"Načtena a zobrazena progrese z analysis: {prog_data['song']}")
+
+        item_id = selected_items[0]
+        prog_data = self.prog_tree_data.get(item_id)
+
+        if not prog_data:
+            logger.warning("Nenalezena data pro vybranou progrese")
+            return
+
+        chords = prog_data.get('chords', [])
+        if not chords:
+            self.main_window.app_state.log("Vybraná progrese nemá akordy - nelze nahrát")
+            return
+
+        # Načte progrese do aplikace
+        song_name = prog_data['song']
+        self.main_window.load_progression(chords, f"{song_name} (z analýzy)")
+
+        # Zobrazí první akord
+        first_chord = chords[0]
+        self.main_window._display_chord_on_keyboard(first_chord)
+
+        logger.info(f"Nahraná progrese z analýzy: {song_name}")
+
+    def reset_display(self) -> None:
+        """Resetuje zobrazení analýzy do výchozího stavu."""
+        if self.chord_name_label:
+            self.chord_name_label.config(text="Akord: -")
+
+        if self.chord_notes_label:
+            self.chord_notes_label.config(text="Noty: -")
+
+        if self.prog_tree:
+            self._clear_progressions()
+
+        logger.debug("Zobrazení analýzy resetováno")

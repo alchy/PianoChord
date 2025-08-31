@@ -1,15 +1,45 @@
 # main.py
+"""
+main.py - Refaktorovaný vstupní bod aplikace.
+Jednoduchý a čistý startup s centralizovaným logováním.
+"""
+
 import sys
-from gui_main import PianoGUI
+import logging
+from config import setup_logging
 
-# --- DEBUG ---
-# Urcuje, zda se budou vypisovat ladici informace.
-DEBUG = True
+# Inicializace logování před importem ostatních modulů
+setup_logging()
+logger = logging.getLogger(__name__)
 
-if DEBUG:
-    print("Spouštím aplikaci PianoChord")
-    print(f"Verze Pythonu: {sys.version}")
+
+def main():
+    """Hlavní funkce aplikace."""
+    logger.info("Spouštím Piano Chord Analyzer")
+    logger.info(f"Verze Pythonu: {sys.version}")
+
+    try:
+        # Import zde pro zajištění správné inicializace loggingu
+        from main_window import MainWindow
+
+        # Vytvoření a spuštění aplikace
+        app = MainWindow()
+        app.run()
+
+    except ImportError as e:
+        logger.error(f"Chyba při importu závislostí: {e}")
+        print(f"CHYBA: Chybí závislosti - {e}")
+        print("Nainstalujte požadované balíčky: pip install -r requirements.txt")
+        sys.exit(1)
+
+    except Exception as e:
+        logger.error(f"Neočekávaná chyba při spuštění aplikace: {e}")
+        print(f"KRITICKÁ CHYBA: {e}")
+        sys.exit(1)
+
+    finally:
+        logger.info("Aplikace ukončena")
+
 
 if __name__ == '__main__':
-    app = PianoGUI()
-    app.run()
+    main()
