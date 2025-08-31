@@ -37,11 +37,20 @@ class JazzStandardsDatabase:
                 {"chords": ["Dm7", "G7", "C", "F"], "description": "iv-VII7-III-VI in relative major"}
             ]
         },
-        "Georgia (On My Mind)": {
+        "Georgia (Origina)": {
             "key": "F", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["F", "Am7", "Dm7", "G7", "C7", "F"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
                 {"chords": ["Bbmaj7", "Bdim7", "C7", "F"], "description": "IV-#iio7-V-I turnaround"}
+            ]
+        },
+
+        "Georgia (Ray Charles Piano Cover)": {
+            "key": "G", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
+            "progressions": [
+                {"chords": ["G", "C7", "C", "Cm6", "Em", "A7", "D7", "D", "G", "B7", "Em", "G7", "C#m" ], "description": "Dle Chodify"},
+                {"chords": ["G", "Bm7", "Em7", "A7", "D7", "G"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
+                {"chords": ["C", "C#dim7", "D7", "G"], "description": "IV-#ivo7-V-I turnaround"}
             ]
         },
 
