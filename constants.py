@@ -1,10 +1,11 @@
 # constants.py
 """
-constants.py - Refaktorované hudební konstanty a knihovna akordů.
+constants.py - Rozšířené hudební konstanty a knihovna akordů.
+NOVÉ: Přidány Drop 2 voicingy a vylepšené smooth voicingy.
 Importuje z config.py pro konzistenci a používá centralizované logování.
 """
 
-from typing import List
+from typing import List, Tuple
 from functools import lru_cache
 import logging
 from config import MusicalConstants
@@ -13,7 +14,10 @@ logger = logging.getLogger(__name__)
 
 
 class ChordLibrary:
-    """Knihovna akordů a jejich voicingů - refaktorovaná pro jednoduchost."""
+    """
+    Knihovna akordů a jejich voicingů - rozšířená o Drop 2 voicingy.
+    Podporuje tři typy voicingů: Root, Smooth a Drop 2.
+    """
 
     # Definice akordových typů s intervaly od základní noty (v půltónech)
     CHORD_VOICINGS = {
@@ -53,8 +57,16 @@ class ChordLibrary:
     @lru_cache(maxsize=256)
     def get_root_voicing(cls, base_note: str, chord_type: str) -> List[int]:
         """
-        Vrací MIDI noty pro akord v základním tvaru.
+        Vrací MIDI noty pro akord v základním tvaru (root position).
+        Všechny noty jsou v těsné poloze nad sebou.
         Používá cache pro rychlost při opakovaném volání.
+
+        Args:
+            base_note: Základní nota akordu (např. "C", "F#")
+            chord_type: Typ akordu (např. "maj7", "m7")
+
+        Returns:
+            List[int]: MIDI čísla not akordu v root voicingu
         """
         # Fallback pro prázdný chord_type
         if not chord_type:
@@ -80,7 +92,16 @@ class ChordLibrary:
     def get_smooth_voicing(cls, base_note: str, chord_type: str, prev_chord_midi: List[int]) -> List[int]:
         """
         Najde nejbližší inverzi akordu k předchozímu akordu pro plynulé přechody.
+        Minimalizuje pohyb hlasů mezi akordy (voice leading).
         Pokud není předchozí akord, vrací root voicing.
+
+        Args:
+            base_note: Základní nota nového akordu
+            chord_type: Typ nového akordu
+            prev_chord_midi: MIDI noty předchozího akordu
+
+        Returns:
+            List[int]: MIDI čísla not v smooth voicingu
         """
         if not prev_chord_midi:
             return cls.get_root_voicing(base_note, chord_type)
@@ -89,15 +110,17 @@ class ChordLibrary:
         best_voicing = root_voicing
         min_distance = float('inf')
 
+        # Vypočítá průměrnou výšku předchozího akordu
         avg_prev = sum(prev_chord_midi) / len(prev_chord_midi)
 
-        # Prozkoumá různé oktávy a inverze
+        # Prozkoumá různé oktávy a inverze pro nejmenší vzdálenost
         for octave_shift in range(-2, 3):
-            for i in range(len(root_voicing)):
-                # Vytvoří inverzi
-                inversion = root_voicing[i:] + [note + 12 for note in root_voicing[:i]]
-                current_voicing = [note + octave_shift * 12 for note in inversion]
+            for inversion in range(len(root_voicing)):
+                # Vytvoří inverzi (rotuje noty)
+                inverted_notes = root_voicing[inversion:] + [note + 12 for note in root_voicing[:inversion]]
+                current_voicing = [note + octave_shift * 12 for note in inverted_notes]
 
+                # Vypočítá vzdálenost od předchozího akordu
                 avg_current = sum(current_voicing) / len(current_voicing)
                 distance = abs(avg_current - avg_prev)
 
@@ -108,10 +131,88 @@ class ChordLibrary:
         return best_voicing
 
     @classmethod
+    def get_drop2_voicing(cls, base_note: str, chord_type: str) -> List[int]:
+        """
+        Vytvoří Drop 2 voicing - druhý nejvyšší tón se posune o oktávu dolů.
+        Drop 2 voicing vytváří otevřenější zvuk vhodný pro jazzové aranže.
+
+        Proces:
+        1. Začne s root voicingem v close position
+        2. Přesune druhý nejvyšší tón o oktávu dolů
+        3. Seřadí noty vzestupně
+
+        Args:
+            base_note: Základní nota akordu
+            chord_type: Typ akordu
+
+        Returns:
+            List[int]: MIDI čísla not v Drop 2 voicingu
+
+        Example:
+            Cmaj7 root: [60, 64, 67, 71] (C, E, G, B)
+            Cmaj7 drop2: [60, 55, 67, 71] (C, G-oktáva, G, B)
+        """
+        # Získá základní voicing
+        root_voicing = cls.get_root_voicing(base_note, chord_type)
+
+        # Pro triády (3 noty) nemá Drop 2 smysl, vrací root voicing
+        if len(root_voicing) < 4:
+            logger.debug(f"Drop 2 není vhodný pro triády, používám root voicing pro {base_note}{chord_type}")
+            return root_voicing
+
+        # Vytvoří kopii pro úpravu
+        drop2_voicing = root_voicing.copy()
+
+        # Najde druhý nejvyšší tón (předposlední v seřazeném seznamu)
+        sorted_notes = sorted(drop2_voicing)
+        second_highest = sorted_notes[-2]
+
+        # Najde index druhého nejvyššího tónu v původním voicingu
+        second_highest_index = drop2_voicing.index(second_highest)
+
+        # Posune druhý nejvyšší tón o oktávu dolů
+        drop2_voicing[second_highest_index] = second_highest - 12
+
+        # Seřadí noty vzestupně pro správné zobrazení
+        drop2_voicing.sort()
+
+        logger.debug(f"Drop 2 voicing pro {base_note}{chord_type}: {root_voicing} → {drop2_voicing}")
+        return drop2_voicing
+
+    @classmethod
+    def get_voicing_by_type(cls, base_note: str, chord_type: str, voicing_type: str,
+                            prev_chord_midi: List[int] = None) -> Tuple[List[int], str]:
+        """
+        Univerzální metoda pro získání voicingu podle typu.
+        Centralizuje logiku volby voicingu a vrací i barvu pro zobrazení.
+
+        Args:
+            base_note: Základní nota akordu
+            chord_type: Typ akordu
+            voicing_type: Typ voicingu ("root", "smooth", "drop2")
+            prev_chord_midi: Předchozí akord pro smooth voicing
+
+        Returns:
+            Tuple[List[int], str]: (MIDI noty, barva pro zobrazení)
+        """
+        if voicing_type == "smooth":
+            return cls.get_smooth_voicing(base_note, chord_type, prev_chord_midi or []), "green"
+        elif voicing_type == "drop2":
+            return cls.get_drop2_voicing(base_note, chord_type), "blue"
+        else:  # root voicing (default)
+            return cls.get_root_voicing(base_note, chord_type), "red"
+
+    @classmethod
     def _get_fallback_chord_type(cls, original_type: str) -> str:
         """
         Určí fallback typ akordu pro neznámé typy.
-        Jednoduché pravidlo pro lepší čitelnost.
+        Používá jednoduché heuristiky pro lepší uživatelskou zkušenost.
+
+        Args:
+            original_type: Původní (neznámý) typ akordu
+
+        Returns:
+            str: Fallback typ akordu
         """
         if not original_type:
             return "maj"
@@ -130,7 +231,14 @@ class ChordLibrary:
     def midi_to_key_nr(midi_note: int, base_octave_midi_start: int = 21) -> int:
         """
         Převede MIDI číslo na číslo klávesy pro zobrazení na klaviatuře.
-        A0 = klávesa číslo 0.
+        A0 (MIDI 21) = klávesa číslo 0.
+
+        Args:
+            midi_note: MIDI číslo noty (21-108 pro 88klávesovou klaviaturu)
+            base_octave_midi_start: MIDI číslo první klávesy (A0 = 21)
+
+        Returns:
+            int: Číslo klávesy pro zobrazení (0-87)
         """
         return midi_note - base_octave_midi_start
 
@@ -139,6 +247,13 @@ def transpose_note(note: str, semitones: int) -> str:
     """
     Transponuje základní notu o daný počet půltónů.
     Jednoduché a čitelné řešení bez složitých optimalizací.
+
+    Args:
+        note: Původní nota (např. "C", "F#")
+        semitones: Počet půltónů pro transpozici (kladný = výš, záporný = níž)
+
+    Returns:
+        str: Transponovaná nota
     """
     # Normalizuje enharmonické názvy
     note = MusicalConstants.ENHARMONIC_MAP.get(note.upper(), note.upper())
@@ -154,7 +269,14 @@ def transpose_note(note: str, semitones: int) -> str:
 def transpose_chord(chord: str, semitones: int) -> str:
     """
     Transponuje celý akord (base_note + type) o daný počet půltónů.
-    Importuje HarmonyAnalyzer lokálně pro vyhnuti cyklickým importům.
+    Importuje HarmonyAnalyzer lokálně pro vyhnutí cyklickým importům.
+
+    Args:
+        chord: Celý název akordu (např. "Cmaj7", "Am7b5")
+        semitones: Počet půltónů pro transpozici
+
+    Returns:
+        str: Transponovaný akord
     """
     from harmony_analyzer import HarmonyAnalyzer
 

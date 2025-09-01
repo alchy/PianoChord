@@ -1,6 +1,7 @@
 # gui_analysis.py
 """
 gui_analysis.py - Refaktorované komponenty pro analýzu akordů v GUI.
+OPRAVA: Při double-clicku na progrese se nepřehrává MIDI, jen zobrazuje vizuálně.
 Zjednodušeno pro lepší čitelnost a údržbu.
 """
 
@@ -18,7 +19,8 @@ logger = logging.getLogger(__name__)
 class AnalysisHandler:
     """
     Refaktorovaná třída pro zpracování analýzy v GUI.
-    Zodpovídá pouze za zobrazení výsledků analýzy.
+    OPRAVA: Double-click na progrese už nepřehrává MIDI, pouze zobrazuje vizuálně.
+    Odpovídá pouze za zobrazení výsledků analýzy.
     """
 
     def __init__(self, main_window: 'MainWindow'):
@@ -62,7 +64,7 @@ class AnalysisHandler:
         """Vytvoří sekci se seznamem progresí."""
         prog_frame = ttk.Labelframe(
             parent,
-            text="Reálné progrese (z jazzových standardů)",
+            text="Reálné progrese (z jazzových standardů) - Double-click pro náhled bez zvuku",
             padding=10
         )
         prog_frame.grid(row=1, column=0, sticky="nsew")
@@ -93,6 +95,9 @@ class AnalysisHandler:
         """
         Zobrazí výsledky analýzy akordu v GUI.
         Aktualizuje jak informace o akordu, tak seznam progresí.
+
+        Args:
+            analysis: Slovník s výsledky analýzy akordu
         """
         # Aktualizace informací o akordu
         self.chord_name_label.config(text=f"Akord: {analysis['chord_name']}")
@@ -140,8 +145,9 @@ class AnalysisHandler:
 
     def _on_progression_double_click(self, event) -> None:
         """
-        Obslužná metoda pro double-click na progrese.
-        Nahraje vybranou progrese do progression playeru.
+        OPRAVA: Obslužná metoda pro double-click na progrese.
+        Nyní pouze zobrazuje progrese vizuálně BEZ MIDI přehrávání.
+        Pro plné přehrávání s MIDI musí uživatel přejít do Progression Playeru.
         """
         selected_items = self.prog_tree.selection()
         if not selected_items:
@@ -159,15 +165,21 @@ class AnalysisHandler:
             self.main_window.app_state.log("Vybraná progrese nemá akordy - nelze nahrát")
             return
 
-        # Načte progrese do aplikace
+        # OPRAVA: Načte progrese do aplikace (bez MIDI při načítání)
         song_name = prog_data['song']
-        self.main_window.load_progression(chords, f"{song_name} (z analýzy)")
+        self.main_window.load_progression(chords, f"{song_name} (z analýzy - náhled)")
 
-        # Zobrazí první akord
+        # OPRAVA: Zobrazí první akord pouze VIZUÁLNĚ (bez MIDI)
         first_chord = chords[0]
-        self.main_window._display_chord_on_keyboard(first_chord)
+        if self.main_window.chord_display_manager:
+            self.main_window.chord_display_manager.display_chord_visual_only(first_chord)
 
-        logger.info(f"Nahraná progrese z analýzy: {song_name}")
+        # Informační zpráva pro uživatele
+        self.main_window.app_state.log(
+            f"Náhled progrese z analýzy: {song_name} (pro přehrávání přejděte na Progression Player)"
+        )
+
+        logger.info(f"Nahrána progrese z analýzy (náhled): {song_name}")
 
     def reset_display(self) -> None:
         """Resetuje zobrazení analýzy do výchozího stavu."""

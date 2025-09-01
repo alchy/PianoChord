@@ -215,7 +215,16 @@ class JazzStandardsDatabase:
                 {"chords": ["Dm7", "G7", "E7", "Amaj7", "D7", "Gmaj7"],
                  "description": "Sekvence ii-V modulující po terciích, Coltrane-style"}
             ]
+        },
+        # --- Lidove ---
+        "Ó řebíčku zahradnický": {
+            "key": "D", "difficulty": "Simple",
+            "progressions": [
+                {"chords": ["D", "Bm", "Em", "A7", "Em", "A7", "D", "A7", "D"],
+                 "description": "Sekvence ii-V modulující po terciích, Coltrane-style"}
+            ]
         }
+
     }
 
     # Slovník pro transponované verze (vytvoří se při inicializaci)
