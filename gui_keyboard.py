@@ -1,15 +1,12 @@
 # gui_keyboard.py
 """
 gui_keyboard.py - Vizuální komponenta klaviatury pro GUI.
-Obsahuje třídy pro kreslení kláves a klaviatury.
 """
-
 import tkinter as tk
 from typing import List, Tuple
 
-from constants import MusicalConstants
+from core_constants import MusicalConstants
 
-# DEBUG importováno z constants.py (pokud potřeba, ale zde vypnuto pro méně spamu)
 DEBUG = False
 
 

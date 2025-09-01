@@ -1,15 +1,14 @@
-# jazz_database.py
+# core_database.py
 """
-jazz_database.py - Databáze jazzových standardů a jejich progresí.
-OPRAVA: Aktualizované importy pro novou architekturu.
+core_database.py - Databáze jazzových standardů a jejich progresí.
 """
 
 import logging
 from typing import List, Dict, Optional, Any
 from functools import lru_cache
-from constants import transpose_chord
 
 logger = logging.getLogger(__name__)
+
 
 class JazzStandardsDatabase:
     """Databáze jazzových standardů a jejich progresí."""
@@ -20,14 +19,14 @@ class JazzStandardsDatabase:
             "key": "C", "composer": "Bart Howard", "year": 1954, "difficulty": "Easy - Medium",
             "progressions": [
                 {"chords": ["Am7", "Dm7", "G7", "Cmaj7"], "description": "vi-ii-V-I hlavní progrese"},
-                {"chords": ["Fmaj7", "Bm7b5", "E7", "Am7"], "description": "IV-viiØ-III7-vi modulace do vi"}
+                {"chords": ["Fmaj7", "Bm7b5", "E7", "Am7"], "description": "IV-viiø-III7-vi modulace do vi"}
             ]
         },
         "Autumn Leaves": {
             "key": "Gm", "composer": "Joseph Kosma", "year": 1945, "difficulty": "Easy-Medium",
             "progressions": [
                 {"chords": ["Cm7", "F7", "Bbmaj7", "Ebmaj7"], "description": "ii-V-I-IV v Bb dur"},
-                {"chords": ["Am7b5", "D7", "Gm"], "description": "iiØ-V-i v G moll"}
+                {"chords": ["Am7b5", "D7", "Gm"], "description": "iiø-V-i v G moll"}
             ]
         },
         "Summertime": {
@@ -37,7 +36,7 @@ class JazzStandardsDatabase:
                 {"chords": ["Dm7", "G7", "C", "F"], "description": "iv-VII7-III-VI in relative major"}
             ]
         },
-        "Georgia (Origina)": {
+        "Georgia (Original)": {
             "key": "F", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["F", "Am7", "Dm7", "G7", "C7", "F"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
@@ -48,7 +47,8 @@ class JazzStandardsDatabase:
         "Georgia (Ray Charles Piano Cover)": {
             "key": "G", "composer": "Hoagy Carmichael", "year": 1930, "difficulty": "Medium",
             "progressions": [
-                {"chords": ["G", "C7", "C", "Cm6", "Em", "A7", "D7", "D", "G", "B7", "Em", "G7", "C#m" ], "description": "Dle Chodify"},
+                {"chords": ["G", "C7", "C", "Cm6", "Em", "A7", "D7", "D", "G", "B7", "Em", "G7", "C#m"],
+                 "description": "Dle Chordify"},
                 {"chords": ["G", "Bm7", "Em7", "A7", "D7", "G"], "description": "Hlavní progrese s vi-ii-V-I modulací"},
                 {"chords": ["C", "C#dim7", "D7", "G"], "description": "IV-#ivo7-V-I turnaround"}
             ]
@@ -66,7 +66,7 @@ class JazzStandardsDatabase:
         "Blue Bossa": {
             "key": "Cm", "composer": "Kenny Dorham", "year": 1963, "difficulty": "Medium",
             "progressions": [
-                {"chords": ["Cm7", "Fm7", "Dm7b5", "G7", "Cm7"], "description": "i-iv-iiØ-V-i v C moll"},
+                {"chords": ["Cm7", "Fm7", "Dm7b5", "G7", "Cm7"], "description": "i-iv-iiø-V-i v C moll"},
                 {"chords": ["Ebm7", "Ab7", "Dbmaj7"], "description": "ii-V-I v Db dur"}
             ]
         },
@@ -98,7 +98,7 @@ class JazzStandardsDatabase:
         "Stella by Starlight": {
             "key": "Bb", "composer": "Victor Young", "year": 1944, "difficulty": "Medium-Advanced",
             "progressions": [
-                {"chords": ["Em7b5", "A7b9", "Cm7", "F7"], "description": "Unresolved iiØ-V leading to ii-V"},
+                {"chords": ["Em7b5", "A7b9", "Cm7", "F7"], "description": "Unresolved iiø-V leading to ii-V"},
                 {"chords": ["Bbmaj7", "Bdim7", "Cm7", "F7"], "description": "I - #io7 - ii-V turnaround"},
                 {"chords": ["Dm7", "G7", "Cm7", "F7"], "description": "ii-V-ii-V cycle"}
             ]
@@ -107,7 +107,7 @@ class JazzStandardsDatabase:
             "key": "Cm", "composer": "Richard Rodgers", "year": 1937, "difficulty": "Medium",
             "progressions": [
                 {"chords": ["Cm", "Cm(maj7)", "Cm7", "Cm6"], "description": "Descending bass line in minor i chord"},
-                {"chords": ["Abmaj7", "Fm7", "Dm7b5", "G7"], "description": "VI-ii-vØ-V progression"},
+                {"chords": ["Abmaj7", "Fm7", "Dm7b5", "G7"], "description": "VI-ii-vø-V progression"},
                 {"chords": ["Cm", "Eb7", "Abmaj7", "D7b9"], "description": "i-III-VI-II7 turnaround"}
             ]
         },
@@ -182,7 +182,7 @@ class JazzStandardsDatabase:
         "ii-V-I Moll základní": {
             "key": "Cm", "difficulty": "Easy",
             "progressions": [
-                {"chords": ["Dm7b5", "G7", "Cm7"], "description": "Základní iiØ-V-i v C moll"}
+                {"chords": ["Dm7b5", "G7", "Cm7"], "description": "Základní iiø-V-i v C moll"}
             ]
         },
         "ii-V-I Dur s rozšířenými akordy": {
@@ -194,7 +194,7 @@ class JazzStandardsDatabase:
         "ii-V-I Moll s alterovaným dominantem": {
             "key": "Cm", "difficulty": "Medium-Advanced",
             "progressions": [
-                {"chords": ["Dm7b5", "G7b9#11", "Cm7"], "description": "iiØ-V-i s alterovaným dominantem"}
+                {"chords": ["Dm7b5", "G7b9#11", "Cm7"], "description": "iiø-V-i s alterovaným dominantem"}
             ]
         },
         "ii-V-I Dur chromatická přechodová": {
@@ -206,7 +206,7 @@ class JazzStandardsDatabase:
         "ii-V-I Moll modulující": {
             "key": "Cm", "difficulty": "Advanced",
             "progressions": [
-                {"chords": ["Am7b5", "D7b9", "Gm7", "C7", "Fm7"], "description": "iiØ-V-i modulace do F moll"}
+                {"chords": ["Am7b5", "D7b9", "Gm7", "C7", "Fm7"], "description": "iiø-V-i modulace do F moll"}
             ]
         },
         "ii-V-I s rozšířenými modulacemi": {
@@ -216,12 +216,12 @@ class JazzStandardsDatabase:
                  "description": "Sekvence ii-V modulující po terciích, Coltrane-style"}
             ]
         },
-        # --- Lidove ---
-        "Ó řebíčku zahradnický": {
+        # --- Lidové ---
+        "Ó řebíčku zahradnickí": {
             "key": "D", "difficulty": "Simple",
             "progressions": [
                 {"chords": ["D", "Bm", "Em", "A7", "Em", "A7", "D", "A7", "D"],
-                 "description": "Sekvence ii-V modulující po terciích, Coltrane-style"}
+                 "description": "Lidová píseň s jednoduchými akordy"}
             ]
         }
 
@@ -232,18 +232,34 @@ class JazzStandardsDatabase:
 
     @classmethod
     def _initialize_transposed_standards(cls):
-        """Vytvoří transponované verze standardů pro všechny 11 transpozic."""
+        """
+        Vytvoří transponované verze standardů pro všech 11 transpozic.
+        OPRAVA: Opraveny importy a přidáno debugging.
+        """
         if cls.TRANSPOSED_STANDARDS:  # Už inicializováno
             return
 
-        from constants import transpose_note  # Import zde pro vyhnutí se cyklům
+        # OPRAVA: Import zde lokálně pro vyhnutí se cyklům
+        try:
+            from core_constants import transpose_note, transpose_chord
+        except ImportError as e:
+            logger.error(f"Chyba importu transpose funkcí: {e}")
+            return
 
+        transposed_count = 0
         for song_name, song_data in cls.JAZZ_STANDARDS.items():
             original_key = song_data["key"]
 
             for semitones in range(1, 12):  # 1 až 11
                 try:
-                    transposed_key = transpose_note(original_key, semitones) if len(original_key) == 1 else transpose_chord(original_key, semitones)
+                    # OPRAVA: Rozlišení mezi jednoduchou notou a akordem
+                    if len(original_key) == 1 or (len(original_key) == 2 and original_key[1] in ['#', 'b']):
+                        # Jednoduchá nota
+                        transposed_key = transpose_note(original_key, semitones)
+                    else:
+                        # Složený akord
+                        transposed_key = transpose_chord(original_key, semitones)
+
                     transposed_progressions = []
 
                     for prog in song_data["progressions"]:
@@ -260,11 +276,12 @@ class JazzStandardsDatabase:
 
                     transposed_name = f"{song_name}_trans_{semitones}"
                     cls.TRANSPOSED_STANDARDS[transposed_name] = transposed_song
+                    transposed_count += 1
 
                 except Exception as e:
                     logger.warning(f"Chyba při transpozici {song_name} o {semitones} půltónů: {e}")
 
-        logger.info(f"Inicializováno {len(cls.TRANSPOSED_STANDARDS)} transponovaných standardů")
+        logger.info(f"Inicializováno {transposed_count} transponovaných standardů")
 
     @classmethod
     def get_song_info(cls, song_name: str) -> Optional[Dict]:
@@ -281,10 +298,15 @@ class JazzStandardsDatabase:
     @classmethod
     @lru_cache(maxsize=128)
     def find_progressions_by_chord(cls, base_note: str, chord_type: str) -> List[Dict[str, Any]]:
-        """Hledá progrese, které obsahují daný akord, včetně transponovaných verzí."""
+        """
+        Hledá progrese, které obsahují daný akord, včetně transponovaných verzí.
+        OPRAVA: Přidáno debugging pro sledování problémů.
+        """
         cls._initialize_transposed_standards()
         target_chord = f"{base_note}{chord_type}"
         results = []
+
+        logger.debug(f"Hledám progrese pro akord: {target_chord}")
 
         # Nejdřív prohledat originály
         for song_name, song_data in cls.JAZZ_STANDARDS.items():
@@ -294,7 +316,9 @@ class JazzStandardsDatabase:
                     prog_copy['song'] = song_name
                     prog_copy['transposed_by'] = 0  # Označení jako originál
                     prog_copy['transposed_key'] = None
+                    prog_copy['original_key'] = song_data["key"]
                     results.append(prog_copy)
+                    logger.debug(f"Nalezena originální progrese v {song_name}: {prog['chords']}")
 
         # Pak transponované
         for song_name, song_data in cls.TRANSPOSED_STANDARDS.items():
@@ -306,6 +330,8 @@ class JazzStandardsDatabase:
                     prog_copy['transposed_key'] = song_data["key"]
                     prog_copy['original_key'] = song_data["original_key"]
                     results.append(prog_copy)
+                    logger.debug(
+                        f"Nalezena transponovaná progrese v {song_name}: {prog['chords']} (transpozice +{song_data['transposed_by']})")
 
-        logger.debug(f"Nalezeno {len(results)} reálných progresí pro akord {target_chord} (včetně transpozic)")
+        logger.info(f"Nalezeno {len(results)} progresí pro akord {target_chord} (včetně transpozic)")
         return results

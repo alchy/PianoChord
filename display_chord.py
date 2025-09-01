@@ -1,23 +1,18 @@
-# chord_display.py
+# display_chord.py
 """
-chord_display.py - Manager pro zobrazování a přehrávání akordů.
-NOVÝ SOUBOR: Obsahuje logiku zobrazování akordů na klaviatuře,
-MIDI playback koordinaci a progression handling.
-OPRAVA: Přidán parametr play_midi pro selektivní potlačení MIDI přehrávání.
-Odpovídá za vše, co se týče zobrazení a přehrání akordů.
+display_chord.py - Manager pro zobrazování a přehrávání akordů.
 """
-
 import logging
 from typing import List, Optional, TYPE_CHECKING
 from tkinter import messagebox
 
-from constants import ChordLibrary
-from harmony_analyzer import HarmonyAnalyzer
+from core_constants import ChordLibrary
+from core_harmony import HarmonyAnalyzer
 
 if TYPE_CHECKING:
-    from main_window import MainWindow
-    from app_state import ApplicationState
-    from midi_manager import MidiManager
+    from gui_main_window import MainWindow
+    from core_state import ApplicationState
+    from hw_midi import MidiManager
     from gui_controls import ControlsManager
     from gui_keyboard import ArchetypeKeyboard
 

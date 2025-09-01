@@ -1,18 +1,16 @@
 # gui_progression.py
 """
 gui_progression.py - Refaktorované komponenty pro progression player v GUI.
-OPRAVA: Aktualizováno pro novou architekturu s main_window.py
 """
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from typing import List, TYPE_CHECKING
 import logging
 
-from jazz_database import JazzStandardsDatabase
+from core_database import JazzStandardsDatabase
 
 if TYPE_CHECKING:
-    from main_window import MainWindow
+    from gui_main_window import MainWindow
 
 logger = logging.getLogger(__name__)
 

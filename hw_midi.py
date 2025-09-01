@@ -1,15 +1,13 @@
-# midi_manager.py
+# hw_midi.py
 """
-midi_manager.py - Centralizovaná správa MIDI funkcí.
-Odděluje MIDI logiku od GUI a ostatních komponent.
+hw_midi.py - Centralizovaná správa MIDI funkcí.
 """
-
 import logging
 import mido
 import time
 import threading
 from typing import List, Optional, Callable
-from config import AppConfig
+from utils_config import AppConfig
 
 logger = logging.getLogger(__name__)
 

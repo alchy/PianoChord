@@ -1,9 +1,8 @@
 # config.py
+# utils_config.py
 """
-config.py - Centralizovaná konfigurace aplikace.
-Obsahuje všechny konstanty, nastavení a konfigurační hodnoty.
+utils_config.py - Centralizovaná konfigurace aplikace.
 """
-
 import logging
 from typing import Dict, List
 

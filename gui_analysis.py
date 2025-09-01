@@ -1,17 +1,14 @@
 # gui_analysis.py
 """
-gui_analysis.py - Refaktorované komponenty pro analýzu akordů v GUI.
-OPRAVA: Při double-clicku na progrese se nepřehrává MIDI, jen zobrazuje vizuálně.
-Zjednodušeno pro lepší čitelnost a údržbu.
+gui_analysis.py - komponenty pro analýzu akordů v GUI.
 """
-
 import tkinter as tk
 from tkinter import ttk
 from typing import Dict, Any, TYPE_CHECKING
 import logging
 
 if TYPE_CHECKING:
-    from main_window import MainWindow
+    from gui_main_window import MainWindow
 
 logger = logging.getLogger(__name__)
 
@@ -19,7 +16,7 @@ logger = logging.getLogger(__name__)
 class AnalysisHandler:
     """
     Refaktorovaná třída pro zpracování analýzy v GUI.
-    OPRAVA: Double-click na progrese už nepřehrává MIDI, pouze zobrazuje vizuálně.
+    OPRAVA: Vrácen správný event handling a přidáno debugging.
     Odpovídá pouze za zobrazení výsledků analýzy.
     """
 
@@ -64,7 +61,7 @@ class AnalysisHandler:
         """Vytvoří sekci se seznamem progresí."""
         prog_frame = ttk.Labelframe(
             parent,
-            text="Reálné progrese (z jazzových standardů) - Double-click pro náhled bez zvuku",
+            text="Reálné progrese (z jazzových standardů) - Klik pro výběr, Double-click pro náhled bez zvuku",
             padding=10
         )
         prog_frame.grid(row=1, column=0, sticky="nsew")
@@ -88,7 +85,8 @@ class AnalysisHandler:
         scrollbar.grid(row=0, column=1, sticky="ns")
         self.prog_tree.configure(yscrollcommand=scrollbar.set)
 
-        # Event handler pro double-click
+        # OPRAVA: Správné event handlery
+        self.prog_tree.bind("<<TreeviewSelect>>", self._on_progression_select)
         self.prog_tree.bind("<Double-1>", self._on_progression_double_click)
 
     def display_analysis_results(self, analysis: Dict[str, Any]) -> None:
@@ -106,8 +104,16 @@ class AnalysisHandler:
         # Vymazání předchozích progresí
         self._clear_progressions()
 
+        # OPRAVA: Debugging pro progrese
+        real_progressions = analysis.get("real_progressions", [])
+        logger.debug(f"Zobrazuji {len(real_progressions)} progresí pro akord {analysis['chord_name']}")
+
         # Naplnění nových progresí
-        self._populate_progressions(analysis["real_progressions"])
+        if real_progressions:
+            self._populate_progressions(real_progressions)
+            logger.info(f"Zobrazeno {len(real_progressions)} progresí pro akord {analysis['chord_name']}")
+        else:
+            logger.info(f"Žádné progrese nenalezeny pro akord {analysis['chord_name']}")
 
         logger.debug(f"Zobrazeny výsledky analýzy pro akord: {analysis['chord_name']}")
 
@@ -116,41 +122,76 @@ class AnalysisHandler:
         for item in self.prog_tree.get_children():
             self.prog_tree.delete(item)
         self.prog_tree_data.clear()
+        logger.debug("Progrese vymazány z treeview")
 
     def _populate_progressions(self, progressions: list) -> None:
-        """Naplní treeview progresemi."""
-        for prog in progressions:
-            # Formátování dat pro zobrazení
-            chords_str = " → ".join(prog["chords"])
-            transposed_str = self._format_transposition_info(prog)
+        """
+        Naplní treeview progresemi.
+        OPRAVA: Přidáno debugging pro sledování problémů.
+        """
+        logger.debug(f"Naplňuji treeview s {len(progressions)} progresemi")
 
-            values = (
-                chords_str,
-                prog["description"],
-                prog["song"],
-                transposed_str
-            )
+        for i, prog in enumerate(progressions):
+            try:
+                # Formátování dat pro zobrazení
+                chords_str = " → ".join(prog["chords"])
+                transposed_str = self._format_transposition_info(prog)
 
-            # Vložení do treeview
-            item_id = self.prog_tree.insert("", "end", values=values)
-            self.prog_tree_data[item_id] = prog
+                values = (
+                    chords_str,
+                    prog["description"],
+                    prog["song"],
+                    transposed_str
+                )
+
+                # Vložení do treeview
+                item_id = self.prog_tree.insert("", "end", values=values)
+                self.prog_tree_data[item_id] = prog
+
+                logger.debug(f"Vložena progrese {i + 1}: {prog['song']} - {chords_str}")
+
+            except Exception as e:
+                logger.error(f"Chyba při vkládání progrese {i}: {e}")
+                continue
+
+        logger.debug(f"Treeview naplněn s {len(self.prog_tree_data)} progresemi")
 
     def _format_transposition_info(self, prog: Dict[str, Any]) -> str:
         """Formátuje informaci o transpozici."""
         transposed_by = prog.get('transposed_by', 0)
         if transposed_by > 0:
-            return f"+{transposed_by} půltónů"
+            original_key = prog.get('original_key', '')
+            transposed_key = prog.get('transposed_key', '')
+            return f"+{transposed_by} půltónů ({original_key} → {transposed_key})"
         else:
             return "Originál"
 
+    def _on_progression_select(self, event) -> None:
+        """
+        NOVÁ METODA: Handler pro výběr progrese (single-click).
+        Pouze loguje výběr bez dalších akcí.
+        """
+        selected_items = self.prog_tree.selection()
+        if not selected_items:
+            return
+
+        item_id = selected_items[0]
+        prog_data = self.prog_tree_data.get(item_id)
+
+        if prog_data:
+            song_name = prog_data['song']
+            chords_str = " → ".join(prog_data['chords'])
+            logger.debug(f"Vybrána progrese: {song_name} - {chords_str}")
+
     def _on_progression_double_click(self, event) -> None:
         """
-        OPRAVA: Obslužná metoda pro double-click na progrese.
+        OPRAVA: Obsluha double-click na progrese.
         Nyní pouze zobrazuje progrese vizuálně BEZ MIDI přehrávání.
         Pro plné přehrávání s MIDI musí uživatel přejít do Progression Playeru.
         """
         selected_items = self.prog_tree.selection()
         if not selected_items:
+            logger.debug("Double-click na progrese, ale žádná položka není vybrána")
             return
 
         item_id = selected_items[0]
@@ -167,7 +208,13 @@ class AnalysisHandler:
 
         # OPRAVA: Načte progrese do aplikace (bez MIDI při načítání)
         song_name = prog_data['song']
-        self.main_window.load_progression(chords, f"{song_name} (z analýzy - náhled)")
+        transposed_info = ""
+        if prog_data.get('transposed_by', 0) > 0:
+            transposed_info = f" (transpozice +{prog_data['transposed_by']})"
+
+        source_description = f"{song_name}{transposed_info} (z analýzy - náhled)"
+
+        self.main_window.load_progression(chords, source_description)
 
         # OPRAVA: Zobrazí první akord pouze VIZUÁLNĚ (bez MIDI)
         first_chord = chords[0]
@@ -179,7 +226,7 @@ class AnalysisHandler:
             f"Náhled progrese z analýzy: {song_name} (pro přehrávání přejděte na Progression Player)"
         )
 
-        logger.info(f"Nahrána progrese z analýzy (náhled): {song_name}")
+        logger.info(f"Nahrána progrese z analýzy (náhled): {song_name} - {len(chords)} akordů")
 
     def reset_display(self) -> None:
         """Resetuje zobrazení analýzy do výchozího stavu."""
@@ -193,3 +240,13 @@ class AnalysisHandler:
             self._clear_progressions()
 
         logger.debug("Zobrazení analýzy resetováno")
+
+    def get_debug_info(self) -> Dict[str, Any]:
+        """
+        NOVÁ METODA: Vrací debug informace pro řešení problémů.
+        """
+        return {
+            "prog_tree_exists": self.prog_tree is not None,
+            "prog_tree_data_count": len(self.prog_tree_data),
+            "treeview_items_count": len(self.prog_tree.get_children()) if self.prog_tree else 0,
+        }

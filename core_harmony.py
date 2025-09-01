@@ -1,16 +1,15 @@
-# harmony_analyzer.py
+# core_harmony.py
 """
 harmony_analyzer.py - Analýza harmonie a progresí.
 Tento modul analyzuje akordy a hledá je v jazzových progresích.
-OPRAVA: Aktualizované importy pro novou architekturu.
 """
 
 from typing import Dict, Any, Tuple
 import logging
 
-from constants import ChordLibrary
-from config import MusicalConstants  # OPRAVA: Import z config místo constants
-from jazz_database import JazzStandardsDatabase
+from core_constants import ChordLibrary
+from utils_config import MusicalConstants
+from core_database import JazzStandardsDatabase
 
 logger = logging.getLogger(__name__)
 

@@ -1,14 +1,11 @@
-# constants.py
+# core_constants.py
 """
-constants.py - Rozšířené hudební konstanty a knihovna akordů.
-NOVÉ: Přidány Drop 2 voicingy a vylepšené smooth voicingy.
-Importuje z config.py pro konzistenci a používá centralizované logování.
+core_constants.py - Rozšířené hudební konstanty a knihovna akordů.
 """
-
 from typing import List, Tuple
 from functools import lru_cache
 import logging
-from config import MusicalConstants
+from utils_config import MusicalConstants
 
 logger = logging.getLogger(__name__)
 
@@ -270,15 +267,8 @@ def transpose_chord(chord: str, semitones: int) -> str:
     """
     Transponuje celý akord (base_note + type) o daný počet půltónů.
     Importuje HarmonyAnalyzer lokálně pro vyhnutí cyklickým importům.
-
-    Args:
-        chord: Celý název akordu (např. "Cmaj7", "Am7b5")
-        semitones: Počet půltónů pro transpozici
-
-    Returns:
-        str: Transponovaný akord
     """
-    from harmony_analyzer import HarmonyAnalyzer
+    from core_harmony import HarmonyAnalyzer  # <-- Musí být takto!
 
     base_note, chord_type = HarmonyAnalyzer.parse_chord_name(chord)
     new_base_note = transpose_note(base_note, semitones)

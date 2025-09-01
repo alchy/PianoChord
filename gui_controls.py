@@ -1,23 +1,21 @@
 # gui_controls.py
 """
 gui_controls.py - Manager pro všechny ovládací prvky GUI.
-NOVÝ SOUBOR: Obsahuje input sekci, MIDI ovládání, log tab a event handling.
-Zodpovídá za všechny způsoby, jak uživatel ovládá aplikaci.
+OPRAVA: Přidáno debugging pro analýzu akordů.
 """
-
 import tkinter as tk
 from tkinter import ttk, messagebox, filedialog
 from typing import Optional, TYPE_CHECKING
 import logging
 
-from config import AppConfig
-from harmony_analyzer import HarmonyAnalyzer
+from utils_config import AppConfig
+from core_harmony import HarmonyAnalyzer
 
 if TYPE_CHECKING:
-    from main_window import MainWindow
-    from app_state import ApplicationState
-    from midi_manager import MidiManager
-    from chord_display import ChordDisplayManager
+    from gui_main_window import MainWindow
+    from core_state import ApplicationState
+    from hw_midi import MidiManager
+    from display_chord import ChordDisplayManager
 
 logger = logging.getLogger(__name__)
 
@@ -214,6 +212,7 @@ class ControlsManager:
         """
         Analyzuje zadaný akord.
         Používá nový voicing systém přes chord_display_manager.
+        OPRAVA: Přidáno debugging pro řešení problémů s progresemi.
         """
         chord_name = self.chord_entry.get().strip()
         if not chord_name:
@@ -221,8 +220,26 @@ class ControlsManager:
             return
 
         try:
+            # Parsing a základní validace
             base_note, chord_type = HarmonyAnalyzer.parse_chord_name(chord_name)
+            self.app_state.log(f"Parsováno: '{chord_name}' -> base_note='{base_note}', chord_type='{chord_type}'")
+
+            # Hlavní analýza
             analysis = HarmonyAnalyzer.analyze(base_note, chord_type)
+
+            # Kontrola výsledků
+            progressions_count = len(analysis.get('real_progressions', []))
+            self.app_state.log(f"Analýza dokončena: {progressions_count} progresí nalezeno")
+
+            # Debug výpis progresí pokud nejsou zobrazeny
+            if progressions_count == 0:
+                self.app_state.log("POZOR: Žádné progrese nenalezeny")
+            else:
+                # Výpis prvních progresí pro kontrolu
+                for i, prog in enumerate(analysis['real_progressions'][:3]):
+                    song = prog.get('song', 'Unknown')
+                    chords = " -> ".join(prog.get('chords', []))
+                    self.app_state.log(f"  Progrese {i + 1}: {song} - {chords}")
 
             # Uloží analýzu do stavu
             self.app_state.set_current_chord_analysis(analysis)
@@ -235,8 +252,15 @@ class ControlsManager:
                 self.chord_display_manager.display_chord_on_keyboard(chord_name)
 
         except ValueError as e:
-            messagebox.showerror("Chyba analýzy", str(e))
+            error_msg = f"Chyba analýzy: {str(e)}"
+            messagebox.showerror("Chyba analýzy", error_msg)
             self.app_state.log(f"CHYBA analýzy: {e}")
+
+        except Exception as e:
+            error_msg = f"Neočekávaná chyba: {str(e)}"
+            messagebox.showerror("Chyba", error_msg)
+            self.app_state.log(f"NEOČEKÁVANÁ CHYBA: {e}")
+            logger.exception("Neočekávaná chyba při analýze akordu")
 
     def _on_midi_enabled_changed(self) -> None:
         """Handler pro zapnutí/vypnutí MIDI."""

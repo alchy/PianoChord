@@ -1,14 +1,11 @@
-# app_state.py
+# core_state.py
 """
-app_state.py - Centralizovaná správa stavu aplikace.
-NOVÉ: Přidán stav pro typ voicingu (root/smooth/drop2).
-Odděluje logiku stavu od GUI komponente pro lepší údržbu.
+core_state.py - Centralizovaná správa stavu aplikace.
 """
-
 import logging
 from typing import List, Dict, Any, Optional
 from datetime import datetime
-from config import AppConfig
+from utils_config import AppConfig
 
 logger = logging.getLogger(__name__)
 

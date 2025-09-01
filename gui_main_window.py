@@ -1,25 +1,20 @@
-# main_window.py
+# gui_main_window.py
 """
-main_window.py - Refaktorované hlavní GUI okno.
-NOVÉ: Zjednodušeno - pouze koordinace komponent a základní setup.
-Zodpovídá za vytvoření, propojení a lifecycle managment komponent.
+gui_main_window.py - hlavní GUI okno.
 """
-
 import tkinter as tk
 from tkinter import ttk
 import logging
 from typing import Optional
 
-from config import AppConfig, MusicalConstants
-from app_state import ApplicationState
-from midi_manager import MidiManager
+from utils_config import AppConfig, MusicalConstants
+from core_state import ApplicationState
+from hw_midi import MidiManager
 from gui_keyboard import ArchetypeKeyboard
 from gui_analysis import AnalysisHandler
 from gui_progression import ProgressionHandler
-
-# Import nových refaktorovaných komponent
 from gui_controls import ControlsManager
-from chord_display import ChordDisplayManager
+from display_chord import ChordDisplayManager
 
 logger = logging.getLogger(__name__)
 

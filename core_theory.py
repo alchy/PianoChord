@@ -1,12 +1,10 @@
-# music_theory.py
+# core_theory.py
 """
-music_theory.py - Modul pro pokročilejší hudební teorii.
-OPRAVA: Aktualizované importy pro novou architekturu.
+core_theory.py - Modul pro pokročilejší hudební teorii.
 """
-
 import logging
-from harmony_analyzer import HarmonyAnalyzer
-from config import MusicalConstants
+from core_harmony import HarmonyAnalyzer
+from utils_config import MusicalConstants
 
 logger = logging.getLogger(__name__)
 

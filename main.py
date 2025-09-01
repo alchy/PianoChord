@@ -1,12 +1,11 @@
 # main.py
 """
-main.py - Refaktorovaný vstupní bod aplikace.
-Jednoduchý a čistý startup s centralizovaným logováním.
+main.py - Vstupní bod aplikace.
 """
 
 import sys
 import logging
-from config import setup_logging
+from utils_config import setup_logging
 
 # Inicializace logování před importem ostatních modulů
 setup_logging()
@@ -20,7 +19,7 @@ def main():
 
     try:
         # Import zde pro zajištění správné inicializace loggingu
-        from main_window import MainWindow
+        from gui_main_window import MainWindow
 
         # Vytvoření a spuštění aplikace
         app = MainWindow()
