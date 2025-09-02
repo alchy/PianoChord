@@ -1,5 +1,6 @@
 {
     "Fly Me to the Moon": {
+        "genre": "jazz-standard",
         "key": "C",
         "composer": "Bart Howard",
         "year": 1954,
@@ -11,11 +12,12 @@
             },
             {
                 "chords": ["Fmaj7", "Bm7b5", "E7", "Am7"],
-                "description": "IV-viiØ-III7-vi modulace do vi"
+                "description": "IV-viiø-III7-vi modulace do vi"
             }
         ]
     },
     "Autumn Leaves": {
+        "genre": "jazz-standard",
         "key": "Gm",
         "composer": "Joseph Kosma",
         "year": 1945,
@@ -27,11 +29,12 @@
             },
             {
                 "chords": ["Am7b5", "D7", "Gm"],
-                "description": "iiØ-V-i v G moll"
+                "description": "iiø-V-i v G moll"
             }
         ]
     },
     "Summertime": {
+        "genre": "jazz-standard",
         "key": "Am",
         "composer": "George Gershwin",
         "year": 1935,
@@ -48,6 +51,7 @@
         ]
     },
     "Georgia (Original)": {
+        "genre": "jazz-standard",
         "key": "F",
         "composer": "Hoagy Carmichael",
         "year": 1930,
@@ -63,27 +67,8 @@
             }
         ]
     },
-    "Georgia (Ray Charles Piano Cover)": {
-        "key": "G",
-        "composer": "Hoagy Carmichael",
-        "year": 1930,
-        "difficulty": "Medium",
-        "progressions": [
-            {
-                "chords": ["G", "C7", "C", "Cm6", "Em", "A7", "D7", "D", "G", "B7", "Em", "G7", "C#m"],
-                "description": "Dle Chordify"
-            },
-            {
-                "chords": ["G", "Bm7", "Em7", "A7", "D7", "G"],
-                "description": "Hlavní progrese s vi-ii-V-I modulací"
-            },
-            {
-                "chords": ["C", "C#dim7", "D7", "G"],
-                "description": "IV-#ivo7-V-I turnaround"
-            }
-        ]
-    },
     "All The Things You Are": {
+        "genre": "jazz-standard",
         "key": "Ab",
         "composer": "Jerome Kern",
         "year": 1939,
@@ -104,6 +89,7 @@
         ]
     },
     "Blue Bossa": {
+        "genre": "latin-jazz",
         "key": "Cm",
         "composer": "Kenny Dorham",
         "year": 1963,
@@ -111,7 +97,7 @@
         "progressions": [
             {
                 "chords": ["Cm7", "Fm7", "Dm7b5", "G7", "Cm7"],
-                "description": "i-iv-iiØ-V-i v C moll"
+                "description": "i-iv-iiø-V-i v C moll"
             },
             {
                 "chords": ["Ebm7", "Ab7", "Dbmaj7"],
@@ -120,6 +106,7 @@
         ]
     },
     "Take The A Train": {
+        "genre": "jazz-standard",
         "key": "C",
         "composer": "Billy Strayhorn",
         "year": 1939,
@@ -135,23 +122,8 @@
             }
         ]
     },
-    "Satin Doll": {
-        "key": "C",
-        "composer": "Duke Ellington",
-        "year": 1953,
-        "difficulty": "Medium",
-        "progressions": [
-            {
-                "chords": ["Dm7", "G7", "Dm7", "G7"],
-                "description": "Opakující se ii-V"
-            },
-            {
-                "chords": ["Em7", "A7", "Dm7", "G7"],
-                "description": "iii-VI7-ii-V prodloužení"
-            }
-        ]
-    },
     "Giant Steps": {
+        "genre": "bebop",
         "key": "B",
         "composer": "John Coltrane",
         "year": 1959,
@@ -172,6 +144,7 @@
         ]
     },
     "Stella by Starlight": {
+        "genre": "jazz-standard",
         "key": "Bb",
         "composer": "Victor Young",
         "year": 1944,
@@ -179,7 +152,7 @@
         "progressions": [
             {
                 "chords": ["Em7b5", "A7b9", "Cm7", "F7"],
-                "description": "Unresolved iiØ-V leading to ii-V"
+                "description": "Unresolved iiø-V leading to ii-V"
             },
             {
                 "chords": ["Bbmaj7", "Bdim7", "Cm7", "F7"],
@@ -192,6 +165,7 @@
         ]
     },
     "My Funny Valentine": {
+        "genre": "jazz-standard",
         "key": "Cm",
         "composer": "Richard Rodgers",
         "year": 1937,
@@ -203,7 +177,7 @@
             },
             {
                 "chords": ["Abmaj7", "Fm7", "Dm7b5", "G7"],
-                "description": "VI-ii-vØ-V progression"
+                "description": "VI-ii-vø-V progression"
             },
             {
                 "chords": ["Cm", "Eb7", "Abmaj7", "D7b9"],
@@ -212,6 +186,7 @@
         ]
     },
     "Waltz for Debby": {
+        "genre": "modern-jazz",
         "key": "Bb",
         "composer": "Bill Evans",
         "year": 1961,
@@ -228,6 +203,7 @@
         ]
     },
     "Peace Piece": {
+        "genre": "modern-jazz",
         "key": "C",
         "composer": "Bill Evans",
         "year": 1958,
@@ -244,6 +220,7 @@
         ]
     },
     "Blue in Green": {
+        "genre": "modern-jazz",
         "key": "Db",
         "composer": "Bill Evans",
         "year": 1959,
@@ -260,6 +237,7 @@
         ]
     },
     "Looking Up": {
+        "genre": "modern-jazz",
         "key": "C",
         "composer": "Michel Petrucciani",
         "year": 1980,
@@ -276,6 +254,7 @@
         ]
     },
     "Brazilian Like": {
+        "genre": "latin-jazz",
         "key": "D",
         "composer": "Michel Petrucciani",
         "year": 1982,
@@ -292,6 +271,7 @@
         ]
     },
     "Little Peace in C For You": {
+        "genre": "modern-jazz",
         "key": "C",
         "composer": "Michel Petrucciani",
         "year": 1985,
@@ -308,6 +288,7 @@
         ]
     },
     "C Jam Blues": {
+        "genre": "blues",
         "key": "C",
         "composer": "Duke Ellington",
         "year": 1942,
@@ -320,6 +301,7 @@
         ]
     },
     "Now's the Time": {
+        "genre": "bebop",
         "key": "F",
         "composer": "Charlie Parker",
         "year": 1945,
@@ -332,6 +314,7 @@
         ]
     },
     "ii-V-I Dur základní": {
+        "genre": "jazz-progressions",
         "key": "C",
         "difficulty": "Easy",
         "progressions": [
@@ -342,16 +325,18 @@
         ]
     },
     "ii-V-I Moll základní": {
+        "genre": "jazz-progressions",
         "key": "Cm",
         "difficulty": "Easy",
         "progressions": [
             {
                 "chords": ["Dm7b5", "G7", "Cm7"],
-                "description": "Základní iiØ-V-i v C moll"
+                "description": "Základní iiø-V-i v C moll"
             }
         ]
     },
     "ii-V-I Dur s rozšířenými akordy": {
+        "genre": "jazz-progressions",
         "key": "C",
         "difficulty": "Medium",
         "progressions": [
@@ -362,16 +347,18 @@
         ]
     },
     "ii-V-I Moll s alterovaným dominantem": {
+        "genre": "jazz-progressions",
         "key": "Cm",
         "difficulty": "Medium-Advanced",
         "progressions": [
             {
                 "chords": ["Dm7b5", "G7b9#11", "Cm7"],
-                "description": "iiØ-V-i s alterovaným dominantem"
+                "description": "iiø-V-i s alterovaným dominantem"
             }
         ]
     },
     "ii-V-I Dur chromatická přechodová": {
+        "genre": "jazz-progressions",
         "key": "C",
         "difficulty": "Advanced",
         "progressions": [
@@ -382,16 +369,18 @@
         ]
     },
     "ii-V-I Moll modulující": {
+        "genre": "jazz-progressions",
         "key": "Cm",
         "difficulty": "Advanced",
         "progressions": [
             {
                 "chords": ["Am7b5", "D7b9", "Gm7", "C7", "Fm7"],
-                "description": "iiØ-V-i modulace do F moll"
+                "description": "iiø-V-i modulace do F moll"
             }
         ]
     },
     "ii-V-I s rozšířenými modulacemi": {
+        "genre": "jazz-progressions",
         "key": "C",
         "difficulty": "Very Advanced",
         "progressions": [
@@ -401,7 +390,8 @@
             }
         ]
     },
-    "Ó řebíčku zahradnický": {
+    "O řebíčku zahradnickém": {
+        "genre": "folk",
         "key": "D",
         "difficulty": "Simple",
         "progressions": [
@@ -412,6 +402,7 @@
         ]
     },
     "All of Me": {
+        "genre": "jazz-standard",
         "key": "C",
         "composer": "Gerald Marks and Seymour Simons",
         "year": 1931,
@@ -432,6 +423,7 @@
         ]
     },
     "Misty": {
+        "genre": "jazz-standard",
         "key": "Eb",
         "composer": "Erroll Garner",
         "year": 1954,
@@ -452,6 +444,7 @@
         ]
     },
     "Night and Day": {
+        "genre": "jazz-standard",
         "key": "C",
         "composer": "Cole Porter",
         "year": 1932,
