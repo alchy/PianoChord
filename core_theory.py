@@ -3,8 +3,7 @@
 core_theory.py - Modul pro pokročilejší hudební teorii.
 """
 import logging
-from core_harmony import HarmonyAnalyzer
-from utils_config import MusicalConstants
+from core_music_theory import get_tritone_substitution  # Import z centrálního modulu
 
 logger = logging.getLogger(__name__)
 
@@ -15,27 +14,14 @@ class MusicTheory:
     @classmethod
     def get_tritone_substitution(cls, dominant_chord: str) -> str:
         """
-        Vrátí tritonovou substituci pro dominantní akord.
-        Příklad: G7 -> Db7
+        DEPRECATED: Použijte get_tritone_substitution z core_music_theory modulu.
+        Zachováno pro zpětnou kompatibilitu - deleguje na centrální funkci.
+
+        Args:
+            dominant_chord: Dominantní akord (např. "G7")
+
+        Returns:
+            str: Tritonová substituce (např. "Db7")
         """
-        try:
-            base_note, chord_type = HarmonyAnalyzer.parse_chord_name(dominant_chord)
-
-            # Funguje jen pro dominantní akordy
-            if '7' not in chord_type:
-                logger.warning(
-                    f"Tritonová substituce funguje jen pro dominantní akordy, vrácen původní: {dominant_chord}")
-                return dominant_chord
-
-            base_index = MusicalConstants.PIANO_KEYS.index(base_note)
-            tritone_index = (base_index + 6) % 12  # Tritonus je 6 půltónů
-
-            sub_note = MusicalConstants.PIANO_KEYS[tritone_index]
-            substitution = f"{sub_note}{chord_type}"
-
-            logger.debug(f"Tritonová substituce pro {dominant_chord} je {substitution}")
-            return substitution
-
-        except (ValueError, IndexError) as e:
-            logger.error(f"Chyba při výpočtu tritonové substituce pro {dominant_chord}: {e}")
-            return dominant_chord  # V případě chyby vrátí původní akord
+        logger.warning("MusicTheory.get_tritone_substitution je deprecated. Použijte core_music_theory.get_tritone_substitution")
+        return get_tritone_substitution(dominant_chord)

@@ -1,6 +1,7 @@
 # core_harmony.py
 """
-harmony_analyzer.py - Analýza harmonie a progresí.
+core_harmony.py - Analýza harmonie a progresí.
+OPRAVENO: Používá centrální core_music_theory.py pro parsování akordů.
 Tento modul analyzuje akordy a hledá je v jazzových progresích.
 """
 
@@ -8,6 +9,7 @@ from typing import Dict, Any, Tuple
 import logging
 
 from core_constants import ChordLibrary
+from core_music_theory import parse_chord_name  # Import z centrálního modulu
 from utils_config import MusicalConstants
 from core_database import JazzStandardsDatabase
 
@@ -22,6 +24,18 @@ class HarmonyAnalyzer:
         """
         Hlavní metoda pro analýzu akordu.
         Zaměřuje se na vlastnosti akordu a jeho výskyt v reálných progresích.
+
+        Args:
+            base_note: Základní nota akordu (např. "C", "F#")
+            chord_type: Typ akordu (např. "maj7", "m7")
+
+        Returns:
+            Dict[str, Any]: Slovník s výsledky analýzy obsahující:
+                - chord_name: Celý název akordu
+                - base_note: Základní nota
+                - chord_type: Typ akordu
+                - chord_notes: Seznam not v akordu
+                - real_progressions: Seznam nalezených progresí
         """
         chord_full_name = f"{base_note}{chord_type or ''}".strip()
 
@@ -57,50 +71,14 @@ class HarmonyAnalyzer:
     @classmethod
     def parse_chord_name(cls, chord_full_name: str) -> Tuple[str, str]:
         """
-        Rozparsuje celý název akordu na základní notu a typ.
-        Optimalizováno pro složité typy jako '7#11' nebo '13b9'.
+        DEPRECATED: Použijte parse_chord_name z core_music_theory modulu.
+        Zachováno pro zpětnou kompatibilitu - deleguje na centrální funkci.
+
+        Args:
+            chord_full_name: Celý název akordu
+
+        Returns:
+            Tuple[str, str]: (základní_nota, typ_akordu)
         """
-        chord = chord_full_name.strip()
-        if not chord:
-            raise ValueError("Prázdný název akordu")
-
-        # Zpracování názvu noty (např. C, C#, Db)
-        if len(chord) > 1 and chord[1] in {'#', 'b'}:
-            base_note = chord[:2]
-            chord_type = chord[2:]
-        else:
-            base_note = chord[0]
-            chord_type = chord[1:]
-
-        # Normalizace enharmonických názvů (např. Db -> C#)
-        base_note = MusicalConstants.ENHARMONIC_MAP.get(base_note.upper(), base_note.upper())
-
-        if base_note not in MusicalConstants.PIANO_KEYS:
-            raise ValueError(f"Neplatná základní nota akordu: {base_note}")
-
-        # Speciální případ pro akordy bez typu (např. "C") - fallback na maj
-        if not chord_type and base_note in chord_full_name:
-            chord_type = "maj"
-
-        # Validace typu akordu s fallback logikou
-        if chord_type not in ChordLibrary.CHORD_VOICINGS:
-            original_type = chord_type
-
-            # Fallback logika pro neznámé typy
-            if not original_type:  # Prázdný typ - fallback na maj
-                chord_type = "maj"
-            elif original_type.startswith('m'):
-                chord_type = 'm7'  # Fallback pro minor varianty
-            elif 'maj' in original_type:
-                chord_type = 'maj7'  # Fallback pro major
-            elif 'sus' in original_type:
-                chord_type = 'sus4'  # Fallback pro suspended
-            elif 'dim' in original_type:
-                chord_type = 'dim7'  # Fallback pro diminished
-            else:
-                chord_type = '7'  # Default fallback pro dominantní typy
-
-            logger.warning(
-                f"Neplatný typ akordu '{original_type}', použit fallback '{chord_type}' pro {chord_full_name}")
-
-        return base_note, chord_type
+        logger.warning("HarmonyAnalyzer.parse_chord_name je deprecated. Použijte core_music_theory.parse_chord_name")
+        return parse_chord_name(chord_full_name)

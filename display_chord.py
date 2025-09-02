@@ -7,7 +7,7 @@ from typing import List, Optional, TYPE_CHECKING
 from tkinter import messagebox
 
 from core_constants import ChordLibrary
-from core_harmony import HarmonyAnalyzer
+from core_music_theory import parse_chord_name
 
 if TYPE_CHECKING:
     from gui_main_window import MainWindow
@@ -55,7 +55,7 @@ class ChordDisplayManager:
             play_midi: Pokud False, nepřehrává MIDI (jen vizuální zobrazení)
         """
         try:
-            base_note, chord_type = HarmonyAnalyzer.parse_chord_name(chord_name)
+            base_note, chord_type = parse_chord_name(chord_name)
 
             # Získá aktuální typ voicingu ze stavu
             voicing_type = self.app_state.get_voicing_type()

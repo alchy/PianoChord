@@ -64,14 +64,19 @@ class ChordLibrary:
 
         Returns:
             List[int]: MIDI čísla not akordu v root voicingu
+
+        Raises:
+            ValueError: Pokud je nota nebo typ akordu neplatný
         """
         # Fallback pro prázdný chord_type
         if not chord_type:
             chord_type = "maj"
 
+        # Import fallback funkce z centrálního modulu
         if chord_type not in cls.CHORD_VOICINGS:
+            from core_music_theory import get_fallback_chord_type
             logger.warning(f"Neznámý typ akordu: {chord_type}, používám fallback")
-            chord_type = cls._get_fallback_chord_type(chord_type)
+            chord_type = get_fallback_chord_type(chord_type)
 
         try:
             base_note_val = MusicalConstants.PIANO_KEYS.index(base_note)
@@ -199,31 +204,6 @@ class ChordLibrary:
         else:  # root voicing (default)
             return cls.get_root_voicing(base_note, chord_type), "red"
 
-    @classmethod
-    def _get_fallback_chord_type(cls, original_type: str) -> str:
-        """
-        Určí fallback typ akordu pro neznámé typy.
-        Používá jednoduché heuristiky pro lepší uživatelskou zkušenost.
-
-        Args:
-            original_type: Původní (neznámý) typ akordu
-
-        Returns:
-            str: Fallback typ akordu
-        """
-        if not original_type:
-            return "maj"
-        elif original_type.startswith('m'):
-            return 'm7'
-        elif 'maj' in original_type:
-            return 'maj7'
-        elif 'sus' in original_type:
-            return 'sus4'
-        elif 'dim' in original_type:
-            return 'dim7'
-        else:
-            return '7'  # Default pro dominantní typy
-
     @staticmethod
     def midi_to_key_nr(midi_note: int, base_octave_midi_start: int = 21) -> int:
         """
@@ -238,38 +218,3 @@ class ChordLibrary:
             int: Číslo klávesy pro zobrazení (0-87)
         """
         return midi_note - base_octave_midi_start
-
-
-def transpose_note(note: str, semitones: int) -> str:
-    """
-    Transponuje základní notu o daný počet půltónů.
-    Jednoduché a čitelné řešení bez složitých optimalizací.
-
-    Args:
-        note: Původní nota (např. "C", "F#")
-        semitones: Počet půltónů pro transpozici (kladný = výš, záporný = níž)
-
-    Returns:
-        str: Transponovaná nota
-    """
-    # Normalizuje enharmonické názvy
-    note = MusicalConstants.ENHARMONIC_MAP.get(note.upper(), note.upper())
-
-    if note not in MusicalConstants.PIANO_KEYS:
-        raise ValueError(f"Neplatná nota: {note}")
-
-    index = MusicalConstants.PIANO_KEYS.index(note)
-    new_index = (index + semitones) % 12
-    return MusicalConstants.PIANO_KEYS[new_index]
-
-
-def transpose_chord(chord: str, semitones: int) -> str:
-    """
-    Transponuje celý akord (base_note + type) o daný počet půltónů.
-    Importuje HarmonyAnalyzer lokálně pro vyhnutí cyklickým importům.
-    """
-    from core_harmony import HarmonyAnalyzer  # <-- Musí být takto!
-
-    base_note, chord_type = HarmonyAnalyzer.parse_chord_name(chord)
-    new_base_note = transpose_note(base_note, semitones)
-    return f"{new_base_note}{chord_type}"
