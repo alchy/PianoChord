@@ -1,7 +1,6 @@
 # core_harmony.py
 """
 core_harmony.py - Analýza harmonie a progresí.
-OPRAVENO: Používá centrální core_music_theory.py pro parsování akordů.
 Tento modul analyzuje akordy a hledá je v jazzových progresích.
 """
 
