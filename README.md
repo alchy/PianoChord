@@ -1,3 +1,9 @@
+
+- upravit fallback (Cm8), program informuje o fallback v GUI
+- pro kazdou databazi folder
+- vice stylu
+- nechceme emotikony v debug vypisech ani jinde
+
 # 🎹 Piano Chord Analyzer
 
 **Piano Chord Analyzer** je pokročilá GUI aplikace v Pythonu pro analýzu piano akordů, studium jazzové harmonie a procvičování progresí. Ideální nástroj pro hudebníky, kteří chtějí porozumět harmonii, voicingům a strukturám jazzových standardů.
