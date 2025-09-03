@@ -18,7 +18,7 @@
     },
     "Autumn Leaves": {
         "genre": "jazz-standard",
-        "key": "Gm",
+        "key": "Gmin",
         "composer": "Joseph Kosma",
         "year": 1945,
         "difficulty": "Easy-Medium",
@@ -35,7 +35,7 @@
     },
     "Summertime": {
         "genre": "jazz-standard",
-        "key": "Am",
+        "key": "Amin",
         "composer": "George Gershwin",
         "year": 1935,
         "difficulty": "Easy",
@@ -326,7 +326,7 @@
     },
     "ii-V-I Moll základní": {
         "genre": "jazz-progressions",
-        "key": "Cm",
+        "key": "Cmin",
         "difficulty": "Easy",
         "progressions": [
             {
@@ -370,7 +370,7 @@
     },
     "ii-V-I Moll modulující": {
         "genre": "jazz-progressions",
-        "key": "Cm",
+        "key": "Cmin",
         "difficulty": "Advanced",
         "progressions": [
             {
