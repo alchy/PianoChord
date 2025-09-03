@@ -1,6 +1,0 @@
-# requirements.txt
-# Závislosti pro Piano Chord Analyzer
-
-# MIDI podpora pro hraní akordů v reálném čase
-mido==1.3.2  # Základní MIDI knihovna; uprav podle potřeby
-python-rtmidi>=1.5.8  # Backend pro mido (nutný pro otevírání portů); uprav podle potřeby
