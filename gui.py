@@ -255,9 +255,9 @@ class PianoChordAnalyzer:
                                                      command=self.start_training_mode)
         self.start_chord_training_button.pack(side=tk.LEFT, padx=2)
 
-        # Note Training (zatím disabled)
+        # Note Training
         self.start_note_training_button = ttk.Button(training_frame, text="Note Training",
-                                                    state="disabled")
+                                                    command=self.start_note_training_mode)
         self.start_note_training_button.pack(side=tk.LEFT, padx=2)
 
         midi_frame = ttk.LabelFrame(controls_frame, text="MIDI", padding=10)
@@ -400,17 +400,20 @@ class PianoChordAnalyzer:
             else:
                 self.midi_input_port_var.set("No MIDI input ports")
 
-            # Enable/disable Chord Training button podle dostupnosti input portu
+            # Enable/disable Training buttons podle dostupnosti input portu
             if self.midi_playback.is_midi_input_available():
                 self.start_chord_training_button.config(state="normal")
+                self.start_note_training_button.config(state="normal")
             else:
                 self.start_chord_training_button.config(state="disabled")
+                self.start_note_training_button.config(state="disabled")
 
         except Exception as e:
             logger.error(f"Error loading MIDI ports: {e}")
             self.midi_output_port_var.set("MIDI unavailable")
             self.midi_input_port_var.set("MIDI unavailable")
             self.start_chord_training_button.config(state="disabled")
+            self.start_note_training_button.config(state="disabled")
 
     def on_midi_output_port_changed(self, event=None):
         # Input: event (tk.Event, optional)
@@ -440,26 +443,45 @@ class PianoChordAnalyzer:
                 current_port = self.midi_playback.get_current_midi_input_port()
                 self.midi_input_port_var.set(current_port)
             else:
-                # Enable Chord Training button
+                # Enable Training buttons
                 self.start_chord_training_button.config(state="normal")
+                self.start_note_training_button.config(state="normal")
 
     def start_training_mode(self):
         # Input: None
-        # Description: Spustí Training Mode okno.
+        # Description: Spustí Chord Training Mode okno.
         # Output: None
-        # Called by: Start Training button in create_controls_section
+        # Called by: Chord Training button in create_controls_section
         if not self.midi_playback.is_midi_input_available():
-            messagebox.showerror("Training Mode",
+            messagebox.showerror("Chord Training Mode",
                                "MIDI Input port is not available.\nPlease connect a MIDI keyboard and select an input port.")
             return
 
         try:
             from training_gui import TrainingWindow
             training_window = TrainingWindow(self.root, self.music_analytics, self.midi_playback)
-            logger.info("Training Mode started")
+            logger.info("Chord Training Mode started")
         except Exception as e:
-            logger.error(f"Error starting Training Mode: {e}")
-            messagebox.showerror("Error", f"Cannot start Training Mode: {str(e)}")
+            logger.error(f"Error starting Chord Training Mode: {e}")
+            messagebox.showerror("Error", f"Cannot start Chord Training Mode: {str(e)}")
+
+    def start_note_training_mode(self):
+        # Input: None
+        # Description: Spustí Note Training Mode okno.
+        # Output: None
+        # Called by: Note Training button in create_controls_section
+        if not self.midi_playback.is_midi_input_available():
+            messagebox.showerror("Note Training Mode",
+                               "MIDI Input port is not available.\nPlease connect a MIDI keyboard and select an input port.")
+            return
+
+        try:
+            from note_training_gui import NoteTrainingWindow
+            note_training_window = NoteTrainingWindow(self.root, self.music_analytics, self.midi_playback)
+            logger.info("Note Training Mode started")
+        except Exception as e:
+            logger.error(f"Error starting Note Training Mode: {e}")
+            messagebox.showerror("Error", f"Cannot start Note Training Mode: {str(e)}")
 
     def analyze_chord(self):
         # Input: None
