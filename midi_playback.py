@@ -115,15 +115,22 @@ class MidiPlayback:
         try:
             import mido
 
+            logger.info(f"Setting MIDI input port: {port_name}, callback={'provided' if callback else 'None'}")
+
             # Zavřeme starý input port pokud existuje
             if self.midi_input:
+                logger.debug("Closing existing MIDI input port")
                 self.midi_input.close()
                 self.midi_input = None
 
             # Otevřeme nový input port s callbackem
+            logger.debug(f"Opening MIDI input port: {port_name}")
             self.midi_input = mido.open_input(port_name)
             self.current_input_port_index = self.available_input_ports.index(port_name) if port_name in self.available_input_ports else 0
             self.input_callback = callback
+
+            logger.info(f"MIDI input port opened successfully: {port_name}")
+            logger.info(f"Input callback registered: {self.input_callback is not None}")
 
             # Spustíme listening thread
             self._start_input_listening()
@@ -131,7 +138,7 @@ class MidiPlayback:
             logger.info(f"MIDI input port changed to: {port_name}")
             return True
         except Exception as e:
-            logger.error(f"Error changing MIDI input port: {e}")
+            logger.error(f"Error changing MIDI input port: {e}", exc_info=True)
             return False
 
     def get_current_midi_output_port(self) -> str:
@@ -184,19 +191,26 @@ class MidiPlayback:
         # Output: None
         # Called by: set_midi_input_port
         if self.midi_input_thread and self.midi_input_thread.is_alive():
+            logger.debug("MIDI input listening thread already running")
             return  # Thread již běží
+
+        logger.info("Starting MIDI input listening thread...")
 
         def listen():
             try:
+                logger.info("MIDI input listening thread started")
                 while self.midi_input:
                     for message in self.midi_input.iter_pending():
+                        logger.debug(f"Received MIDI message: {message}")
                         self._handle_midi_input_message(message)
                     time.sleep(0.001)  # Krátká pauza pro snížení CPU
+                logger.warning("MIDI input listening thread stopped (midi_input closed)")
             except Exception as e:
-                logger.error(f"MIDI input listening error: {e}")
+                logger.error(f"MIDI input listening error: {e}", exc_info=True)
 
         self.midi_input_thread = threading.Thread(target=listen, daemon=True)
         self.midi_input_thread.start()
+        logger.info(f"MIDI input listening thread started: {self.midi_input_thread.is_alive()}")
 
     def _handle_midi_input_message(self, message):
         # Input: message (mido.Message)
@@ -204,27 +218,41 @@ class MidiPlayback:
         # Output: None
         # Called by: _start_input_listening
         try:
+            logger.debug(f"Handling MIDI message: type={message.type}, note={getattr(message, 'note', None)}, velocity={getattr(message, 'velocity', None)}")
+
             if message.type == 'note_on' and message.velocity > 0:
+                logger.info(f"NOTE_ON: note={message.note}, velocity={message.velocity}")
+
                 # Přehraj notu zpět (instant feedback)
                 self._play_note_feedback(message.note, message.velocity)
 
                 # Přidej do bufferu
                 self.pressed_notes.add(message.note)
+                logger.debug(f"Pressed notes buffer: {self.pressed_notes}")
 
                 # Zavolej callback pokud existuje
                 if self.input_callback:
+                    logger.debug(f"Calling input_callback with note_on")
                     self.input_callback('note_on', message.note, self.pressed_notes.copy())
+                else:
+                    logger.warning("No input_callback registered!")
 
             elif message.type == 'note_off' or (message.type == 'note_on' and message.velocity == 0):
+                logger.info(f"NOTE_OFF: note={getattr(message, 'note', None)}")
+
                 # Odstraň z bufferu
                 self.pressed_notes.discard(message.note)
+                logger.debug(f"Pressed notes buffer after removal: {self.pressed_notes}")
 
                 # Zavolaj callback pokud existuje
                 if self.input_callback:
+                    logger.debug(f"Calling input_callback with note_off")
                     self.input_callback('note_off', message.note, self.pressed_notes.copy())
+                else:
+                    logger.warning("No input_callback registered!")
 
         except Exception as e:
-            logger.error(f"Error handling MIDI input message: {e}")
+            logger.error(f"Error handling MIDI input message: {e}", exc_info=True)
 
     def _play_note_feedback(self, note: int, velocity: int):
         # Input: note (int), velocity (int)

@@ -58,7 +58,9 @@ class NoteTrainingWindow:
         self._setup_gui()
 
         # Register MIDI input callback
+        logger.info("Registering MIDI input callback for Note Training...")
         self.midi_playback.input_callback = self._on_midi_input
+        logger.info(f"MIDI input callback registered: {self.midi_playback.input_callback is not None}")
 
         # Start first challenge
         self._start_new_challenge()
@@ -149,6 +151,8 @@ class NoteTrainingWindow:
             note: MIDI note number
             pressed_notes: Set aktuálně stisknutých not
         """
+        logger.debug(f"Note Training callback received: event_type={event_type}, note={note}, pressed_notes={pressed_notes}")
+
         if event_type == 'note_on':
             # Aktualizuj vizualizaci
             self._draw_played_note(note)
