@@ -247,48 +247,53 @@ class PianoChordAnalyzer:
             ttk.Radiobutton(voicing_frame, text=text, variable=self.voicing_var,
                             value=value, command=self.on_voicing_changed).pack(side=tk.LEFT, padx=2)
 
+        # Training zóna
+        training_frame = ttk.LabelFrame(input_frame, text="Training", padding=5)
+        training_frame.pack(side=tk.LEFT, padx=10)
+
+        self.start_chord_training_button = ttk.Button(training_frame, text="Chord Training",
+                                                     command=self.start_training_mode)
+        self.start_chord_training_button.pack(side=tk.LEFT, padx=2)
+
+        # Note Training (zatím disabled)
+        self.start_note_training_button = ttk.Button(training_frame, text="Note Training",
+                                                    state="disabled")
+        self.start_note_training_button.pack(side=tk.LEFT, padx=2)
+
         midi_frame = ttk.LabelFrame(controls_frame, text="MIDI", padding=10)
         midi_frame.pack(fill="x", pady=5)
 
-        # První řádek: Play MIDI, MIDI Port Out, MIDI Port In
-        midi_row1 = ttk.Frame(midi_frame)
-        midi_row1.pack(fill="x", pady=2)
+        # Jeden řádek: Play MIDI, MIDI Port Out, MIDI Port In, Velocity
+        midi_row = ttk.Frame(midi_frame)
+        midi_row.pack(fill="x", pady=2)
 
         self.midi_enabled_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(midi_row1, text="Play MIDI", variable=self.midi_enabled_var,
+        ttk.Checkbutton(midi_row, text="Play MIDI", variable=self.midi_enabled_var,
                         command=self.on_midi_changed).pack(side=tk.LEFT, padx=5)
 
-        ttk.Label(midi_row1, text="MIDI Port Out:").pack(side=tk.LEFT, padx=(10, 5))
+        ttk.Label(midi_row, text="MIDI Port Out:").pack(side=tk.LEFT, padx=(10, 5))
 
         self.midi_output_port_var = tk.StringVar()
-        self.midi_output_port_combo = ttk.Combobox(midi_row1, textvariable=self.midi_output_port_var,
+        self.midi_output_port_combo = ttk.Combobox(midi_row, textvariable=self.midi_output_port_var,
                                                    width=25, state="readonly")
         self.midi_output_port_combo.pack(side=tk.LEFT, padx=5)
         self.midi_output_port_combo.bind("<<ComboboxSelected>>", self.on_midi_output_port_changed)
 
-        ttk.Label(midi_row1, text="MIDI Port In:").pack(side=tk.LEFT, padx=(10, 5))
+        ttk.Label(midi_row, text="MIDI Port In:").pack(side=tk.LEFT, padx=(10, 5))
 
         self.midi_input_port_var = tk.StringVar()
-        self.midi_input_port_combo = ttk.Combobox(midi_row1, textvariable=self.midi_input_port_var,
+        self.midi_input_port_combo = ttk.Combobox(midi_row, textvariable=self.midi_input_port_var,
                                                   width=25, state="readonly")
         self.midi_input_port_combo.pack(side=tk.LEFT, padx=5)
         self.midi_input_port_combo.bind("<<ComboboxSelected>>", self.on_midi_input_port_changed)
 
-        # Druhý řádek: Velocity slider a Start Chord Training tlačítko
-        midi_row2 = ttk.Frame(midi_frame)
-        midi_row2.pack(fill="x", pady=2)
-
-        ttk.Label(midi_row2, text="Velocity:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(midi_row, text="Velocity:").pack(side=tk.LEFT, padx=(10, 5))
 
         self.velocity_var = tk.DoubleVar(value=64)
-        velocity_slider = ttk.Scale(midi_row2, from_=0, to=127, orient=tk.HORIZONTAL,
-                                    variable=self.velocity_var, length=150,
+        velocity_slider = ttk.Scale(midi_row, from_=0, to=127, orient=tk.HORIZONTAL,
+                                    variable=self.velocity_var, length=100,
                                     command=self.on_velocity_changed)
         velocity_slider.pack(side=tk.LEFT, padx=5)
-
-        self.start_training_button = ttk.Button(midi_row2, text="Start Chord Training",
-                                               command=self.start_training_mode)
-        self.start_training_button.pack(side=tk.LEFT, padx=20)
 
         self.populate_midi_ports()
 
@@ -395,17 +400,17 @@ class PianoChordAnalyzer:
             else:
                 self.midi_input_port_var.set("No MIDI input ports")
 
-            # Enable/disable Start Training button podle dostupnosti input portu
+            # Enable/disable Chord Training button podle dostupnosti input portu
             if self.midi_playback.is_midi_input_available():
-                self.start_training_button.config(state="normal")
+                self.start_chord_training_button.config(state="normal")
             else:
-                self.start_training_button.config(state="disabled")
+                self.start_chord_training_button.config(state="disabled")
 
         except Exception as e:
             logger.error(f"Error loading MIDI ports: {e}")
             self.midi_output_port_var.set("MIDI unavailable")
             self.midi_input_port_var.set("MIDI unavailable")
-            self.start_training_button.config(state="disabled")
+            self.start_chord_training_button.config(state="disabled")
 
     def on_midi_output_port_changed(self, event=None):
         # Input: event (tk.Event, optional)
@@ -435,8 +440,8 @@ class PianoChordAnalyzer:
                 current_port = self.midi_playback.get_current_midi_input_port()
                 self.midi_input_port_var.set(current_port)
             else:
-                # Enable Start Training button
-                self.start_training_button.config(state="normal")
+                # Enable Chord Training button
+                self.start_chord_training_button.config(state="normal")
 
     def start_training_mode(self):
         # Input: None
