@@ -250,25 +250,49 @@ class PianoChordAnalyzer:
         midi_frame = ttk.LabelFrame(controls_frame, text="MIDI", padding=10)
         midi_frame.pack(fill="x", pady=5)
 
+        # První řádek: Play MIDI checkbox, Velocity slider
+        midi_row1 = ttk.Frame(midi_frame)
+        midi_row1.pack(fill="x", pady=2)
+
         self.midi_enabled_var = tk.BooleanVar(value=True)
-        ttk.Checkbutton(midi_frame, text="Play MIDI", variable=self.midi_enabled_var,
+        ttk.Checkbutton(midi_row1, text="Play MIDI", variable=self.midi_enabled_var,
                         command=self.on_midi_changed).pack(side=tk.LEFT, padx=5)
 
-        ttk.Label(midi_frame, text="Velocity:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(midi_row1, text="Velocity:").pack(side=tk.LEFT, padx=5)
 
         self.velocity_var = tk.DoubleVar(value=64)
-        velocity_slider = ttk.Scale(midi_frame, from_=0, to=127, orient=tk.HORIZONTAL,
+        velocity_slider = ttk.Scale(midi_row1, from_=0, to=127, orient=tk.HORIZONTAL,
                                     variable=self.velocity_var, length=100,
                                     command=self.on_velocity_changed)
         velocity_slider.pack(side=tk.LEFT, padx=5)
 
-        ttk.Label(midi_frame, text="MIDI Port:").pack(side=tk.LEFT, padx=(20, 5))
+        # Druhý řádek: MIDI Port Out (pro přehrávání)
+        midi_row2 = ttk.Frame(midi_frame)
+        midi_row2.pack(fill="x", pady=2)
 
-        self.midi_port_var = tk.StringVar()
-        self.midi_port_combo = ttk.Combobox(midi_frame, textvariable=self.midi_port_var,
-                                            width=25, state="readonly")
-        self.midi_port_combo.pack(side=tk.LEFT, padx=5)
-        self.midi_port_combo.bind("<<ComboboxSelected>>", self.on_midi_port_changed)
+        ttk.Label(midi_row2, text="MIDI Port Out:").pack(side=tk.LEFT, padx=5)
+
+        self.midi_output_port_var = tk.StringVar()
+        self.midi_output_port_combo = ttk.Combobox(midi_row2, textvariable=self.midi_output_port_var,
+                                                   width=30, state="readonly")
+        self.midi_output_port_combo.pack(side=tk.LEFT, padx=5)
+        self.midi_output_port_combo.bind("<<ComboboxSelected>>", self.on_midi_output_port_changed)
+
+        # Třetí řádek: MIDI Port In (pro training input) + Start Training tlačítko
+        midi_row3 = ttk.Frame(midi_frame)
+        midi_row3.pack(fill="x", pady=2)
+
+        ttk.Label(midi_row3, text="MIDI Port In:").pack(side=tk.LEFT, padx=5)
+
+        self.midi_input_port_var = tk.StringVar()
+        self.midi_input_port_combo = ttk.Combobox(midi_row3, textvariable=self.midi_input_port_var,
+                                                  width=30, state="readonly")
+        self.midi_input_port_combo.pack(side=tk.LEFT, padx=5)
+        self.midi_input_port_combo.bind("<<ComboboxSelected>>", self.on_midi_input_port_changed)
+
+        self.start_training_button = ttk.Button(midi_row3, text="Start Training",
+                                               command=self.start_training_mode)
+        self.start_training_button.pack(side=tk.LEFT, padx=10)
 
         self.populate_midi_ports()
 
@@ -351,35 +375,90 @@ class PianoChordAnalyzer:
 
     def populate_midi_ports(self):
         # Input: None
-        # Description: Populates the MIDI ports combobox.
+        # Description: Populates the MIDI output and input ports comboboxes.
         # Output: None
         # Called by: create_controls_section
         try:
-            available_ports = self.midi_playback.get_available_midi_ports()
-            self.midi_port_combo['values'] = available_ports
+            # Populate output ports
+            available_output_ports = self.midi_playback.get_available_midi_output_ports()
+            self.midi_output_port_combo['values'] = available_output_ports
 
-            if available_ports:
-                current_port = self.midi_playback.get_current_midi_port()
-                self.midi_port_var.set(current_port)
+            if available_output_ports:
+                current_output_port = self.midi_playback.get_current_midi_output_port()
+                self.midi_output_port_var.set(current_output_port)
             else:
-                self.midi_port_var.set("No MIDI ports")
+                self.midi_output_port_var.set("No MIDI output ports")
+
+            # Populate input ports
+            available_input_ports = self.midi_playback.get_available_midi_input_ports()
+            self.midi_input_port_combo['values'] = available_input_ports
+
+            if available_input_ports:
+                current_input_port = self.midi_playback.get_current_midi_input_port()
+                self.midi_input_port_var.set(current_input_port)
+            else:
+                self.midi_input_port_var.set("No MIDI input ports")
+
+            # Enable/disable Start Training button podle dostupnosti input portu
+            if self.midi_playback.is_midi_input_available():
+                self.start_training_button.config(state="normal")
+            else:
+                self.start_training_button.config(state="disabled")
 
         except Exception as e:
             logger.error(f"Error loading MIDI ports: {e}")
-            self.midi_port_var.set("MIDI unavailable")
+            self.midi_output_port_var.set("MIDI unavailable")
+            self.midi_input_port_var.set("MIDI unavailable")
+            self.start_training_button.config(state="disabled")
 
-    def on_midi_port_changed(self, event=None):
+    def on_midi_output_port_changed(self, event=None):
         # Input: event (tk.Event, optional)
-        # Description: Handles MIDI port change.
+        # Description: Handles MIDI output port change.
         # Output: None
         # Called by: Combobox binding in create_controls_section
-        selected_port = self.midi_port_var.get()
-        if selected_port and selected_port != "No MIDI ports":
-            success = self.midi_playback.set_midi_port(selected_port)
+        selected_port = self.midi_output_port_var.get()
+        if selected_port and selected_port != "No MIDI output ports":
+            success = self.midi_playback.set_midi_output_port(selected_port)
             if not success:
-                messagebox.showerror("MIDI Error", f"Cannot set MIDI port: {selected_port}")
-                current_port = self.midi_playback.get_current_midi_port()
-                self.midi_port_var.set(current_port)
+                messagebox.showerror("MIDI Error", f"Cannot set MIDI output port: {selected_port}")
+                current_port = self.midi_playback.get_current_midi_output_port()
+                self.midi_output_port_var.set(current_port)
+
+    def on_midi_input_port_changed(self, event=None):
+        # Input: event (tk.Event, optional)
+        # Description: Handles MIDI input port change.
+        # Output: None
+        # Called by: Combobox binding in create_controls_section
+        selected_port = self.midi_input_port_var.get()
+        if selected_port and selected_port != "No MIDI input ports":
+            # Pro nyní pouze nastavíme port bez callbacku
+            # Callback bude nastaven až v Training Mode
+            success = self.midi_playback.set_midi_input_port(selected_port, callback=None)
+            if not success:
+                messagebox.showerror("MIDI Error", f"Cannot set MIDI input port: {selected_port}")
+                current_port = self.midi_playback.get_current_midi_input_port()
+                self.midi_input_port_var.set(current_port)
+            else:
+                # Enable Start Training button
+                self.start_training_button.config(state="normal")
+
+    def start_training_mode(self):
+        # Input: None
+        # Description: Spustí Training Mode okno.
+        # Output: None
+        # Called by: Start Training button in create_controls_section
+        if not self.midi_playback.is_midi_input_available():
+            messagebox.showerror("Training Mode",
+                               "MIDI Input port is not available.\nPlease connect a MIDI keyboard and select an input port.")
+            return
+
+        try:
+            from training_gui import TrainingWindow
+            training_window = TrainingWindow(self.root, self.music_analytics, self.midi_playback)
+            logger.info("Training Mode started")
+        except Exception as e:
+            logger.error(f"Error starting Training Mode: {e}")
+            messagebox.showerror("Error", f"Cannot start Training Mode: {str(e)}")
 
     def analyze_chord(self):
         # Input: None
