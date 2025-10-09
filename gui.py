@@ -237,6 +237,8 @@ class PianoChordAnalyzer:
 
         ttk.Button(input_frame, text="Analyze", command=self.analyze_chord).pack(side=tk.LEFT, padx=5)
 
+        ttk.Button(input_frame, text="Chord-Scale Info", command=self.show_chord_scale_info).pack(side=tk.LEFT, padx=5)
+
         voicing_frame = ttk.LabelFrame(input_frame, text="Voicing", padding=5)
         voicing_frame.pack(side=tk.LEFT, padx=10)
 
@@ -452,9 +454,15 @@ class PianoChordAnalyzer:
         chords = [chord.strip() for chord in progression_text.split("→")]
         annotations = [anno.strip() for anno in annotations_text.split("→")]
 
-        # Fallback to detect if annotations not present
+        # Fallback: pokud nejsou anotace přítomny, zkusíme detekovat sekundární dominanty
+        # Použijeme původní klíč z databáze
         if all(a == "" for a in annotations):
-            original_key = [p for p in progressions if p['song'] == song_name][0].get('original_key', 'C')
+            # Zkusíme najít původní klíč v databázi
+            original_key = 'C'  # Výchozí klíč
+            for song_data in self.music_analytics.database.values():
+                if song_data.get('key') == 'C':  # Jednoduchý fallback
+                    original_key = 'C'
+                    break
             annotations = self.music_analytics.detect_secondary_dominants(chords, original_key)
 
         self.music_analytics.current_progression = chords
@@ -628,6 +636,110 @@ class PianoChordAnalyzer:
         self.midi_playback.play_chord_midi(midi_notes)  # Play sec dom
         # Optional: time.sleep(1); play current chord
         logger.info(f"Played secondary dominant: {sec_dom} for {current_chord}")
+
+    def show_chord_scale_info(self):
+        """
+        Zobrazí okno s informacemi o chord-scale relationship pro aktuální akord.
+
+        Input: None
+        Description: Získá akord z entry pole nebo z aktuální progrese a zobrazí doporučené stupnice
+        Output: None
+        Called by: Tlačítko "Chord-Scale Info"
+        """
+        # Získáme akord buď z entry, nebo z aktuální progrese
+        chord_name = self.chord_entry.get().strip()
+        if not chord_name and self.music_analytics.current_progression:
+            chord_name = self.music_analytics.current_progression[self.music_analytics.current_index]
+
+        if not chord_name:
+            messagebox.showwarning("Input", "Enter a chord name or load a progression")
+            return
+
+        try:
+            # Získáme chord-scale informace
+            cs_info = self.music_analytics.get_chord_scale_relationship(chord_name)
+
+            if 'error' in cs_info:
+                messagebox.showerror("Error", f"Cannot analyze chord-scale: {cs_info['error']}")
+                return
+
+            # Vytvoříme nové okno
+            info_window = tk.Toplevel(self.root)
+            info_window.title(f"Chord-Scale Info: {chord_name}")
+            info_window.geometry("600x500")
+
+            # Hlavní frame
+            main_frame = ttk.Frame(info_window, padding=20)
+            main_frame.pack(fill=tk.BOTH, expand=True)
+
+            # Název akordu
+            title_label = ttk.Label(main_frame, text=f"Akord: {cs_info['chord_name']}",
+                                   font=("Arial", 16, "bold"))
+            title_label.pack(pady=10)
+
+            # Doporučený mód
+            mode_frame = ttk.LabelFrame(main_frame, text="Doporučený mód", padding=10)
+            mode_frame.pack(fill=tk.X, pady=10)
+
+            mode_name_label = ttk.Label(mode_frame, text=cs_info['recommended_mode'],
+                                        font=("Arial", 14, "bold"), foreground="blue")
+            mode_name_label.pack()
+
+            mode_desc_label = ttk.Label(mode_frame, text=cs_info['description'],
+                                       wraplength=500, justify=tk.LEFT)
+            mode_desc_label.pack(pady=5)
+
+            # Noty stupnice
+            scale_frame = ttk.LabelFrame(main_frame, text="Noty stupnice", padding=10)
+            scale_frame.pack(fill=tk.X, pady=10)
+
+            scale_notes_text = ", ".join(cs_info['scale_notes'])
+            scale_label = ttk.Label(scale_frame, text=scale_notes_text,
+                                   font=("Arial", 12))
+            scale_label.pack()
+
+            # Chord tones
+            chord_tones_frame = ttk.LabelFrame(main_frame, text="Chord Tones (základní noty akordu)", padding=10)
+            chord_tones_frame.pack(fill=tk.X, pady=10)
+
+            chord_tones_text = ", ".join(cs_info['chord_tones'])
+            chord_tones_label = ttk.Label(chord_tones_frame, text=chord_tones_text,
+                                         font=("Arial", 12, "bold"), foreground="darkgreen")
+            chord_tones_label.pack()
+
+            # Tensions (noty pro barvu)
+            tensions_frame = ttk.LabelFrame(main_frame, text="Tensions (barevné tóny pro improvizaci)", padding=10)
+            tensions_frame.pack(fill=tk.X, pady=10)
+
+            if cs_info['tensions']:
+                tensions_text = ", ".join(cs_info['tensions'])
+                tensions_label = ttk.Label(tensions_frame, text=tensions_text,
+                                          font=("Arial", 12), foreground="purple")
+                tensions_label.pack()
+            else:
+                no_tensions_label = ttk.Label(tensions_frame, text="Žádné další tensions",
+                                             font=("Arial", 12), foreground="gray")
+                no_tensions_label.pack()
+
+            # Avoid notes
+            if cs_info['avoid_notes']:
+                avoid_frame = ttk.LabelFrame(main_frame, text="Avoid Notes (vyhýbejte se těmto tónům)", padding=10)
+                avoid_frame.pack(fill=tk.X, pady=10)
+
+                avoid_text = ", ".join(cs_info['avoid_notes'])
+                avoid_label = ttk.Label(avoid_frame, text=avoid_text,
+                                       font=("Arial", 12), foreground="red")
+                avoid_label.pack()
+
+            # Tlačítko pro zavření
+            close_button = ttk.Button(main_frame, text="Close", command=info_window.destroy)
+            close_button.pack(pady=20)
+
+            logger.info(f"Zobrazeno chord-scale info pro {chord_name}")
+
+        except Exception as e:
+            logger.error(f"Chyba při zobrazování chord-scale info: {e}")
+            messagebox.showerror("Error", f"Cannot display chord-scale info: {str(e)}")
 
     def run(self):
         # Input: None

@@ -383,3 +383,146 @@ class MusicAnalytics:
         dom_idx = (target_idx + 7) % 12  # Up P5 for dom root
         dom_note = config.PIANO_KEYS[dom_idx]
         return f"{dom_note}7"  # Simple dom7; could extend to voicing
+
+    def get_harmonic_function(self, chord_name: str, key: str) -> str:
+        """
+        Určí harmonickou funkci akordu v dané tónině.
+
+        Input: chord_name (str) - Název akordu, key (str) - Tónina
+        Description: Analyzuje akord a vrací jeho harmonickou funkci (Tonic, Subdominant, Dominant, nebo Secondary Dominant)
+        Output: String s názvem funkce
+        Called by: GUI pro zobrazení barevného označení
+        """
+        try:
+            base_note, chord_type = self.parse_chord(chord_name)
+            key_root, _ = self.parse_chord(key)
+
+            # Získáme stupeň akordu v tónině
+            base_idx = config.PIANO_KEYS.index(base_note)
+            key_idx = config.PIANO_KEYS.index(key_root)
+            degree = (base_idx - key_idx) % 12
+
+            # Detekce dominantních akordů (V stupeň)
+            if degree == 7 and self.is_dominant_type(chord_type):
+                return "Dominant"
+
+            # Detekce subdominantních akordů (IV stupeň v dur, iv v moll)
+            if degree == 5:
+                return "Subdominant"
+
+            # Detekce tónických akordů (I stupeň)
+            if degree == 0:
+                return "Tonic"
+
+            # Detekce ii stupně (často pre-dominant)
+            if degree == 2:
+                return "Subdominant"
+
+            # Detekce vi stupně (může zastupovat tóniku)
+            if degree == 9:
+                return "Tonic"
+
+            # Pokud je to dominant type mimo V stupeň, pravděpodobně sekundární dominanta
+            if self.is_dominant_type(chord_type):
+                return "Secondary Dominant"
+
+            # Zmenšené akordy
+            if chord_type in ["dim", "dim7", "m7b5"]:
+                return "Diminished"
+
+            # Default fallback
+            return "Other"
+
+        except Exception as e:
+            logger.warning(f"Chyba při určování harmonické funkce pro {chord_name}: {e}")
+            return "Unknown"
+
+    def get_chord_scale_relationship(self, chord_name: str) -> Dict[str, any]:
+        """
+        Vrací doporučené stupnice pro improvizaci nad daným akordem.
+
+        Input: chord_name (str) - Název akordu
+        Description: Určí vhodné stupnice/mody pro improvizaci nad akordem
+        Output: Dictionary s informacemi o stupnici, avoid notes a tensions
+        Called by: GUI pro zobrazení doporučených not pro improvizaci
+        """
+        try:
+            base_note, chord_type = self.parse_chord(chord_name)
+            base_idx = config.PIANO_KEYS.index(base_note)
+
+            # Získáme doporučený mod ze configu
+            recommended_mode = config.CHORD_SCALE_MAP.get(chord_type, "Ionian")
+
+            # Získáme intervaly pro daný mod
+            if recommended_mode == "Altered":
+                scale_intervals = config.ALTERED_SCALE
+            elif recommended_mode == "Whole Tone":
+                scale_intervals = config.WHOLE_TONE_SCALE
+            elif recommended_mode == "Diminished":
+                scale_intervals = config.DIMINISHED_SCALE
+            else:
+                scale_intervals = config.MODES.get(recommended_mode, config.MAJOR_SCALE_INTERVALS)
+
+            # Vypočítáme absolutní noty stupnice
+            scale_notes = [(base_idx + interval) % 12 for interval in scale_intervals]
+            scale_note_names = [config.PIANO_KEYS[note] for note in scale_notes]
+
+            # Získáme noty akordu
+            chord_intervals = config.CHORD_TYPES.get(chord_type, config.CHORD_TYPES["maj"])
+            chord_notes = [(base_idx + interval) % 12 for interval in chord_intervals]
+
+            # Tensions jsou noty ve stupnici, které nejsou v základním akordu
+            tension_notes = [note for note in scale_notes if note not in chord_notes]
+            tension_note_names = [config.PIANO_KEYS[note] for note in tension_notes]
+
+            # Avoid notes (pro pokročilou analýzu - zatím prázdné, můžeme rozšířit)
+            avoid_notes = []
+
+            # Pro některé akordy určíme specific avoid notes
+            if chord_type in ["maj", "maj7", "maj9"]:
+                # V Ionian módu je 4. stupeň (subdominanta) často avoid note
+                fourth_degree = (base_idx + 5) % 12
+                if fourth_degree in scale_notes and fourth_degree not in chord_notes:
+                    avoid_notes.append(config.PIANO_KEYS[fourth_degree])
+
+            return {
+                'chord_name': chord_name,
+                'base_note': base_note,
+                'chord_type': chord_type,
+                'recommended_mode': recommended_mode,
+                'scale_notes': scale_note_names,
+                'chord_tones': [config.PIANO_KEYS[note] for note in chord_notes],
+                'tensions': tension_note_names,
+                'avoid_notes': avoid_notes,
+                'description': self._get_mode_description(recommended_mode)
+            }
+
+        except Exception as e:
+            logger.error(f"Chyba při určování chord-scale relationship pro {chord_name}: {e}")
+            return {
+                'chord_name': chord_name,
+                'error': str(e),
+                'recommended_mode': 'Unknown'
+            }
+
+    def _get_mode_description(self, mode_name: str) -> str:
+        """
+        Vrací popis módu pro uživatele.
+
+        Input: mode_name (str) - Název módu
+        Description: Vrací lidsky čitelný popis módu
+        Output: String s popisem
+        """
+        descriptions = {
+            "Ionian": "Durová stupnice - světlý, šťastný zvuk",
+            "Dorian": "Mollový mod s velkou sextou - použito u m7 akordů v jazzu",
+            "Phrygian": "Mollový mod s malou sekundou - španělský, temný zvuk",
+            "Lydian": "Durový mod se zvýšenou kvartou - jemný, vznášející se zvuk",
+            "Mixolydian": "Durový mod s malou septimou - použito u dominantních akordů",
+            "Aeolian": "Přirozený moll - smutný, melancholický",
+            "Locrian": "Zmenšený mod - nestabilní, tenzní zvuk",
+            "Altered": "Alterovaná stupnice - pro alt. dominanty (7#9, 7b9, atd.)",
+            "Whole Tone": "Celotónová stupnice - pro zvětšené dominanty",
+            "Diminished": "Zmenšená stupnice - symetrická, pro dim7 akordy"
+        }
+        return descriptions.get(mode_name, "Bez popisu")
