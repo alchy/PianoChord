@@ -23,12 +23,21 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - **Chord-Scale Info**: Zobrazení doporučených stupnic a tensions pro improvizaci
 
 ### Training Mode (NOVĚ!)
+
+**Chord Training:**
 - **Interaktivní trénink**: Rozpoznávání a hraní akordů na MIDI klaviatuře
 - **Progresivní obtížnost**: 4 úrovně (Triads → Seventh Chords → Extended → Altered)
 - **Real-time feedback**: Okamžitá zpětná vazba při hraní
 - **Harmonická kontinuita**: Akordy následují v běžných jazzových progresích
 - **Scoring systém**: Sledování úspěšnosti a automatická progrese obtížnosti
 - **Hint systém**: "Try Again" → "Show Answer" workflow
+
+**Note Training:**
+- **Single note recognition**: Trénink rozpoznávání jednotlivých not
+- **4 úrovně obtížnosti**: White Keys → Sharps → Flats → Mixed
+- **Enharmonické ekvivalenty**: C# ↔ Db, F# ↔ Gb, atd.
+- **Oktávová flexibilita**: Akceptuje notu v jakékoli oktávě
+- **Stejný workflow**: Try Again → Show Answer s barevným feedbackem
 
 ## Instalace
 
@@ -79,8 +88,10 @@ PianoChord/
 ├── music_analytics.py     # Hudební logika: analýza, voicing, transpozice
 ├── midi_playback.py       # MIDI přehrávání a správa portů (včetně input)
 ├── gui.py                 # GUI: klaviatura, ovládací prvky, zobrazení
-├── training_mode.py       # Training Mode logika a session management
-├── training_gui.py        # Training Mode GUI okno
+├── training_mode.py       # Chord Training Mode logika a session management
+├── training_gui.py        # Chord Training Mode GUI okno
+├── note_training.py       # Note Training Mode logika
+├── note_training_gui.py   # Note Training Mode GUI okno
 ├── database.json          # Databáze jazzových progresí
 ├── requirements.txt       # Python závislosti
 ├── README.md              # Tento soubor
@@ -117,10 +128,12 @@ PianoChord/
    - Přehraje sekundární dominantu k aktuálnímu akordu
    - Červeně zvýrazněné anotace (např. "V7/ii") indikují sekundární dominanty
 
-5. **Training Mode - Chord Recognition**
+5. **Training Mode**
    - Připojte MIDI klaviaturu k počítači
    - V sekci MIDI vyberte "MIDI Port In" (vaše MIDI klaviatura)
-   - Klikněte na "Start Training"
+
+   **Chord Training:**
+   - Klikněte na "Chord Training"
    - Zobrazí se cílový akord (např. "Dm7")
    - Zahrajte akord na své klaviatuře v jakémkoli obratu
    - Dostanete okamžitou zpětnou vazbu:
@@ -132,6 +145,17 @@ PianoChord/
      - **Elementary**: Septakordy (Cmaj7, Dm7, G7...)
      - **Intermediate**: Extended (Cmaj9, Dm9, G9...)
      - **Advanced**: Alterované (G7b9, G7#9, Dm7b5...)
+
+   **Note Training:**
+   - Klikněte na "Note Training"
+   - Zobrazí se cílová nota (např. "F#")
+   - Zahrajte notu na své klaviatuře (v jakékoli oktávě)
+   - Dostanete stejnou zpětnou vazbu jako u akordů
+   - Postupujte úrovněmi:
+     - **Beginner**: Pouze bílé klávesy (C, D, E, F, G, A, B)
+     - **Elementary**: Všechny noty s křížky (C#, D#, F#...)
+     - **Intermediate**: Všechny noty s béčky (Db, Eb, Gb...)
+     - **Advanced**: Smíšená notace (náhodně # nebo b)
 
 ### Klávesové zkratky
 
