@@ -250,7 +250,7 @@ class PianoChordAnalyzer:
         midi_frame = ttk.LabelFrame(controls_frame, text="MIDI", padding=10)
         midi_frame.pack(fill="x", pady=5)
 
-        # První řádek: Play MIDI checkbox, Velocity slider
+        # První řádek: Play MIDI, MIDI Port Out, MIDI Port In
         midi_row1 = ttk.Frame(midi_frame)
         midi_row1.pack(fill="x", pady=2)
 
@@ -258,41 +258,37 @@ class PianoChordAnalyzer:
         ttk.Checkbutton(midi_row1, text="Play MIDI", variable=self.midi_enabled_var,
                         command=self.on_midi_changed).pack(side=tk.LEFT, padx=5)
 
-        ttk.Label(midi_row1, text="Velocity:").pack(side=tk.LEFT, padx=5)
-
-        self.velocity_var = tk.DoubleVar(value=64)
-        velocity_slider = ttk.Scale(midi_row1, from_=0, to=127, orient=tk.HORIZONTAL,
-                                    variable=self.velocity_var, length=100,
-                                    command=self.on_velocity_changed)
-        velocity_slider.pack(side=tk.LEFT, padx=5)
-
-        # Druhý řádek: MIDI Port Out (pro přehrávání)
-        midi_row2 = ttk.Frame(midi_frame)
-        midi_row2.pack(fill="x", pady=2)
-
-        ttk.Label(midi_row2, text="MIDI Port Out:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(midi_row1, text="MIDI Port Out:").pack(side=tk.LEFT, padx=(10, 5))
 
         self.midi_output_port_var = tk.StringVar()
-        self.midi_output_port_combo = ttk.Combobox(midi_row2, textvariable=self.midi_output_port_var,
-                                                   width=30, state="readonly")
+        self.midi_output_port_combo = ttk.Combobox(midi_row1, textvariable=self.midi_output_port_var,
+                                                   width=25, state="readonly")
         self.midi_output_port_combo.pack(side=tk.LEFT, padx=5)
         self.midi_output_port_combo.bind("<<ComboboxSelected>>", self.on_midi_output_port_changed)
 
-        # Třetí řádek: MIDI Port In (pro training input) + Start Training tlačítko
-        midi_row3 = ttk.Frame(midi_frame)
-        midi_row3.pack(fill="x", pady=2)
-
-        ttk.Label(midi_row3, text="MIDI Port In:").pack(side=tk.LEFT, padx=5)
+        ttk.Label(midi_row1, text="MIDI Port In:").pack(side=tk.LEFT, padx=(10, 5))
 
         self.midi_input_port_var = tk.StringVar()
-        self.midi_input_port_combo = ttk.Combobox(midi_row3, textvariable=self.midi_input_port_var,
-                                                  width=30, state="readonly")
+        self.midi_input_port_combo = ttk.Combobox(midi_row1, textvariable=self.midi_input_port_var,
+                                                  width=25, state="readonly")
         self.midi_input_port_combo.pack(side=tk.LEFT, padx=5)
         self.midi_input_port_combo.bind("<<ComboboxSelected>>", self.on_midi_input_port_changed)
 
-        self.start_training_button = ttk.Button(midi_row3, text="Start Training",
+        # Druhý řádek: Velocity slider a Start Chord Training tlačítko
+        midi_row2 = ttk.Frame(midi_frame)
+        midi_row2.pack(fill="x", pady=2)
+
+        ttk.Label(midi_row2, text="Velocity:").pack(side=tk.LEFT, padx=5)
+
+        self.velocity_var = tk.DoubleVar(value=64)
+        velocity_slider = ttk.Scale(midi_row2, from_=0, to=127, orient=tk.HORIZONTAL,
+                                    variable=self.velocity_var, length=150,
+                                    command=self.on_velocity_changed)
+        velocity_slider.pack(side=tk.LEFT, padx=5)
+
+        self.start_training_button = ttk.Button(midi_row2, text="Start Chord Training",
                                                command=self.start_training_mode)
-        self.start_training_button.pack(side=tk.LEFT, padx=10)
+        self.start_training_button.pack(side=tk.LEFT, padx=20)
 
         self.populate_midi_ports()
 

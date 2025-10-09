@@ -20,6 +20,15 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - **Transponovaná databáze**: Všechny progrese dostupné ve všech tóninách
 - **Anotace funkcí**: Zobrazení harmonických funkcí akordů
 - **Play Secondary Dominant**: Přehrání sekundární dominanty k aktuálnímu akordu
+- **Chord-Scale Info**: Zobrazení doporučených stupnic a tensions pro improvizaci
+
+### Training Mode (NOVĚ!)
+- **Interaktivní trénink**: Rozpoznávání a hraní akordů na MIDI klaviatuře
+- **Progresivní obtížnost**: 4 úrovně (Triads → Seventh Chords → Extended → Altered)
+- **Real-time feedback**: Okamžitá zpětná vazba při hraní
+- **Harmonická kontinuita**: Akordy následují v běžných jazzových progresích
+- **Scoring systém**: Sledování úspěšnosti a automatická progrese obtížnosti
+- **Hint systém**: "Try Again" → "Show Answer" workflow
 
 ## Instalace
 
@@ -27,6 +36,7 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - Python 3.8 nebo novější
 - Tkinter (obvykle součást Pythonu)
 - MIDI výstup (volitelné, ale doporučené pro plnou funkcionalitu)
+- **MIDI input klaviatura** (vyžadováno pro Training Mode)
 
 ### Kroky instalace
 
@@ -67,12 +77,15 @@ python gui.py
 PianoChord/
 ├── config.py              # Konfigurace: konstanty, stupnice, akordy
 ├── music_analytics.py     # Hudební logika: analýza, voicing, transpozice
-├── midi_playback.py       # MIDI přehrávání a správa portů
+├── midi_playback.py       # MIDI přehrávání a správa portů (včetně input)
 ├── gui.py                 # GUI: klaviatura, ovládací prvky, zobrazení
+├── training_mode.py       # Training Mode logika a session management
+├── training_gui.py        # Training Mode GUI okno
 ├── database.json          # Databáze jazzových progresí
 ├── requirements.txt       # Python závislosti
 ├── README.md              # Tento soubor
-└── main.py                # (Archivováno - starší monolitická verze)
+├── TRAINING_MODE_SPEC.md  # Specifikace Training Mode
+└── main.py                # Vstupní bod aplikace
 ```
 
 ## Použití
@@ -103,6 +116,22 @@ PianoChord/
    - Po načtení progrese klikněte "Play Sec Dom"
    - Přehraje sekundární dominantu k aktuálnímu akordu
    - Červeně zvýrazněné anotace (např. "V7/ii") indikují sekundární dominanty
+
+5. **Training Mode - Chord Recognition**
+   - Připojte MIDI klaviaturu k počítači
+   - V sekci MIDI vyberte "MIDI Port In" (vaše MIDI klaviatura)
+   - Klikněte na "Start Training"
+   - Zobrazí se cílový akord (např. "Dm7")
+   - Zahrajte akord na své klaviatuře v jakémkoli obratu
+   - Dostanete okamžitou zpětnou vazbu:
+     - **Zelená**: Správně! → Automaticky přejde na další akord
+     - **Oranžová**: "Try Again!" → První neúspěšný pokus
+     - **Žlutá**: "Show Answer" → Po druhém neúspěchu zobrazí řešení
+   - Postupujte úrovněmi:
+     - **Beginner**: Triády (C, Dm, Em...)
+     - **Elementary**: Septakordy (Cmaj7, Dm7, G7...)
+     - **Intermediate**: Extended (Cmaj9, Dm9, G9...)
+     - **Advanced**: Alterované (G7b9, G7#9, Dm7b5...)
 
 ### Klávesové zkratky
 
