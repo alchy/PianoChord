@@ -101,7 +101,7 @@ class MusicStaffDisplay:
 
     def draw_chord_notes(self, chord_name: str, midi_notes: List[int]):
         """
-        Nakreslí noty akordu na osnově.
+        Nakreslí noty akordu na osnově (noty nad sebou).
 
         Args:
             chord_name: Název akordu (pro určení předznamenání)
@@ -118,7 +118,9 @@ class MusicStaffDisplay:
         # Určíme, zda použít křížky nebo béčka podle názvu akordu
         use_sharps = '#' in chord_name or 'sharp' in chord_name.lower()
         logger.info(f"[MUSIC_STAFF] Using neoscore rendering for chord, use_sharps={use_sharps}")
-        self.draw_notes(midi_notes, use_sharps)
+
+        # Pro akord používáme speciální render jako vertikální seskupení
+        self._render_neoscore_chord(midi_notes, use_sharps)
 
     def draw_single_note_display(self, note_name: str, midi_note: int):
         """
@@ -139,6 +141,63 @@ class MusicStaffDisplay:
         use_sharps = '#' in note_name
         logger.info(f"[MUSIC_STAFF] Using neoscore rendering for single note, use_sharps={use_sharps}")
         self.draw_notes([midi_note], use_sharps)
+
+    def _render_neoscore_chord(self, midi_notes: List[int], use_sharps: bool = True):
+        """
+        Vykreslí akord pomocí neoscore (všechny noty nad sebou na stejné x pozici).
+
+        Args:
+            midi_notes: MIDI note numbers akordu
+            use_sharps: True = křížky, False = béčka
+        """
+        try:
+            logger.info(f"Rendering chord with neoscore: {len(midi_notes)} notes")
+
+            # Initialize neoscore document
+            neoscore.setup()
+
+            # Create staff with treble clef
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(156))
+            clef.Clef(Mm(0), staff_obj, 'treble')
+            logger.info("Staff and clef created")
+
+            if midi_notes:
+                # Convert all MIDI notes to pitch strings
+                pitch_strings = []
+                for midi_note in sorted(midi_notes):
+                    pitch_str = self._midi_to_neoscore_pitch(midi_note, use_sharps)
+                    pitch_strings.append(pitch_str)
+                    logger.info(f"  MIDI {midi_note} -> {pitch_str}")
+
+                # Create single Chordrest with all notes (they will be stacked vertically)
+                x_pos = Mm(40)  # Center position for chord
+                chordrest.Chordrest(
+                    x_pos,
+                    staff_obj,
+                    pitch_strings,  # All notes in the chord
+                    (1, 4)  # Quarter note duration
+                )
+                logger.info(f"Chord created with {len(pitch_strings)} notes at same position")
+
+            # Render to image file
+            output_path = self.temp_dir / "staff_output.png"
+            neoscore.render_image(
+                rect=None,
+                dest=str(output_path),
+                dpi=150,
+                autocrop=True,
+                quality=-1
+            )
+
+            # Cleanup neoscore
+            neoscore.shutdown()
+
+            # Load image into Tkinter canvas
+            self._display_image_on_canvas(output_path)
+
+        except Exception as e:
+            logger.error(f"Failed to render chord with neoscore: {e}", exc_info=True)
+            self.clear()
 
     def _render_neoscore(self, midi_notes: List[int], use_sharps: Optional[bool] = True):
         """
