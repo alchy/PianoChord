@@ -13,6 +13,7 @@ from midi_playback import MidiPlayback
 from note_training import NoteTrainingSession
 from music_analytics import MusicAnalytics
 from gui import KeyboardDisplay
+from music_staff import MusicStaffDisplay
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +48,9 @@ class NoteTrainingWindow:
 
         # Keyboard display
         self.keyboard_display: Optional[KeyboardDisplay] = None
+
+        # Music staff display
+        self.staff_display: Optional[MusicStaffDisplay] = None
 
         # Labels
         self.target_note_label: Optional[tk.Label] = None
@@ -85,6 +89,16 @@ class NoteTrainingWindow:
 
         self.keyboard_display = KeyboardDisplay(canvas, self.music_analytics)
         self.keyboard_display._draw_empty_keyboard()
+
+        # Music staff section (notová osnova)
+        staff_frame = ttk.LabelFrame(main_frame, text="Music Staff", padding=10)
+        staff_frame.pack(fill=tk.X, pady=10)
+
+        staff_canvas = tk.Canvas(staff_frame, width=400, height=200, bg="white")
+        staff_canvas.pack()
+
+        self.staff_display = MusicStaffDisplay(staff_canvas, width=400, height=200)
+        self.staff_display.draw_staff()
 
         # Target note display (velké zobrazení)
         target_frame = ttk.Frame(main_frame)
@@ -250,6 +264,10 @@ class NoteTrainingWindow:
 
         # Vyčisti klaviaturu
         self.keyboard_display._draw_empty_keyboard()
+
+        # Zobraz notu na notové osnově
+        if self.staff_display:
+            self.staff_display.draw_single_note_display(target_note, target_midi)
 
     def _next_note(self):
         """
