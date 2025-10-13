@@ -13,7 +13,7 @@ from midi_playback import MidiPlayback
 from note_training import NoteTrainingSession
 from music_analytics import MusicAnalytics
 from gui import KeyboardDisplay
-from music_staff import MusicStaffDisplay
+from music_staff_neoscore import MusicStaffDisplay
 
 logger = logging.getLogger(__name__)
 
