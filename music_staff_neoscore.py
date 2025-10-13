@@ -87,12 +87,16 @@ class MusicStaffDisplay:
             midi_notes: Seznam MIDI note numbers
             use_sharps: True = použít křížky (#), False = použít béčka (b)
         """
+        logger.info(f"[MUSIC_STAFF] draw_notes called: {len(midi_notes)} notes, use_neoscore={self.use_neoscore}")
+
         if not self.use_neoscore:
             # Fallback na Tkinter
+            logger.info("[MUSIC_STAFF] Using Tkinter fallback")
             self.tk_display.draw_notes(midi_notes, use_sharps)
             return
 
         # Render using neoscore
+        logger.info("[MUSIC_STAFF] Using neoscore rendering")
         self._render_neoscore(midi_notes, use_sharps)
 
     def draw_chord_notes(self, chord_name: str, midi_notes: List[int]):
@@ -103,13 +107,17 @@ class MusicStaffDisplay:
             chord_name: Název akordu (pro určení předznamenání)
             midi_notes: MIDI note numbers akordu
         """
+        logger.info(f"[MUSIC_STAFF] draw_chord_notes called: chord={chord_name}, {len(midi_notes)} notes, use_neoscore={self.use_neoscore}")
+
         if not self.use_neoscore:
             # Fallback na Tkinter
+            logger.info("[MUSIC_STAFF] Using Tkinter fallback for chord")
             self.tk_display.draw_chord_notes(chord_name, midi_notes)
             return
 
         # Určíme, zda použít křížky nebo béčka podle názvu akordu
         use_sharps = '#' in chord_name or 'sharp' in chord_name.lower()
+        logger.info(f"[MUSIC_STAFF] Using neoscore rendering for chord, use_sharps={use_sharps}")
         self.draw_notes(midi_notes, use_sharps)
 
     def draw_single_note_display(self, note_name: str, midi_note: int):
@@ -120,12 +128,16 @@ class MusicStaffDisplay:
             note_name: Název noty (např. "F#", "Db")
             midi_note: MIDI note number
         """
+        logger.info(f"[MUSIC_STAFF] draw_single_note_display called: note={note_name}, midi={midi_note}, use_neoscore={self.use_neoscore}")
+
         if not self.use_neoscore:
             # Fallback na Tkinter
+            logger.info("[MUSIC_STAFF] Using Tkinter fallback for single note")
             self.tk_display.draw_single_note_display(note_name, midi_note)
             return
 
         use_sharps = '#' in note_name
+        logger.info(f"[MUSIC_STAFF] Using neoscore rendering for single note, use_sharps={use_sharps}")
         self.draw_notes([midi_note], use_sharps)
 
     def _render_neoscore(self, midi_notes: List[int], use_sharps: Optional[bool] = True):
@@ -144,7 +156,7 @@ class MusicStaffDisplay:
 
             # Create staff with treble clef
             # Staff constructor: (pos, parent, length, clef=None)
-            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(120))
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(156))
 
             # Add treble clef - create it as a child of the staff at position x=0
             clef.Clef(Mm(0), staff_obj, 'treble')
@@ -155,14 +167,14 @@ class MusicStaffDisplay:
                 sorted_notes = sorted(midi_notes)
 
                 # Calculate spacing based on number of notes
-                available_width = 80  # mm
+                available_width = 104  # mm (30% larger)
                 if len(sorted_notes) > 1:
-                    note_spacing = min(15, available_width / len(sorted_notes))
+                    note_spacing = min(20, available_width / len(sorted_notes))
                 else:
-                    note_spacing = 10
+                    note_spacing = 13
 
-                # Starting position for notes (after clef, around 20mm)
-                start_x = 20
+                # Starting position for notes (after clef)
+                start_x = 25
 
                 for i, midi_note in enumerate(sorted_notes):
                     x_pos = Mm(start_x + (i * note_spacing))
