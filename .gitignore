@@ -3,3 +3,4 @@ __pycache__/
 *.log
 .claude/
 .venv/
+__old__/

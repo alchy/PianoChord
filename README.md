@@ -31,6 +31,7 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - **Harmonická kontinuita**: Akordy následují v běžných jazzových progresích
 - **Scoring systém**: Sledování úspěšnosti a automatická progrese obtížnosti
 - **Hint systém**: "Try Again" → "Show Answer" workflow
+- **Notová osnova**: Profesionální zobrazení akordů na notové osnově s houslový klíčem
 
 **Note Training:**
 - **Single note recognition**: Trénink rozpoznávání jednotlivých not
@@ -38,6 +39,7 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - **Enharmonické ekvivalenty**: C# ↔ Db, F# ↔ Gb, atd.
 - **Oktávová flexibilita**: Akceptuje notu v jakékoli oktávě
 - **Stejný workflow**: Try Again → Show Answer s barevným feedbackem
+- **Notová osnova**: Zobrazení not na notové osnově pro vizuální trénink čtení not
 
 ## Instalace
 
@@ -46,6 +48,7 @@ Aplikace pro analýzu a trénink jazzových akordických progresí. Navrženo pr
 - Tkinter (obvykle součást Pythonu)
 - MIDI výstup (volitelné, ale doporučené pro plnou funkcionalitu)
 - **MIDI input klaviatura** (vyžadováno pro Training Mode)
+- **Neoscore knihovna** (pro profesionální notovou osnovu, automatický fallback na Tkinter)
 
 ### Kroky instalace
 
@@ -77,26 +80,28 @@ pip install -r requirements.txt
 
 5. **Spuštění aplikace**
 ```bash
-python gui.py
+python main.py
 ```
 
 ## Struktura projektu
 
 ```
 PianoChord/
-├── config.py              # Konfigurace: konstanty, stupnice, akordy
-├── music_analytics.py     # Hudební logika: analýza, voicing, transpozice
-├── midi_playback.py       # MIDI přehrávání a správa portů (včetně input)
-├── gui.py                 # GUI: klaviatura, ovládací prvky, zobrazení
-├── training_mode.py       # Chord Training Mode logika a session management
-├── training_gui.py        # Chord Training Mode GUI okno
-├── note_training.py       # Note Training Mode logika
-├── note_training_gui.py   # Note Training Mode GUI okno
-├── database.json          # Databáze jazzových progresí
-├── requirements.txt       # Python závislosti
-├── README.md              # Tento soubor
-├── TRAINING_MODE_SPEC.md  # Specifikace Training Mode
-└── main.py                # Vstupní bod aplikace
+├── main.py                    # Vstupní bod aplikace
+├── config.py                  # Konfigurace: konstanty, stupnice, akordy
+├── music_analytics.py         # Hudební logika: analýza, voicing, transpozice
+├── midi_playback.py           # MIDI přehrávání a správa portů (včetně input)
+├── gui.py                     # GUI: klaviatura, ovládací prvky, zobrazení
+├── training_mode.py           # Chord Training Mode logika a session management
+├── training_gui.py            # Chord Training Mode GUI okno
+├── note_training.py           # Note Training Mode logika
+├── note_training_gui.py       # Note Training Mode GUI okno
+├── music_staff_neoscore.py    # Notová osnova - neoscore rendering s Tkinter fallback
+├── music_staff.py             # Fallback: Tkinter-based notová osnova
+├── database.json              # Databáze jazzových progresí
+├── requirements.txt           # Python závislosti
+├── README.md                  # Tento soubor
+└── TRAINING_MODE_SPEC.md      # Specifikace Training Mode
 ```
 
 ## Použití
@@ -156,6 +161,16 @@ PianoChord/
      - **Elementary**: Všechny noty s křížky (C#, D#, F#...)
      - **Intermediate**: Všechny noty s béčky (Db, Eb, Gb...)
      - **Advanced**: Smíšená notace (náhodně # nebo b)
+
+6. **Notová osnova v Training Mode**
+   - V Chord a Note Training režimech se zobrazuje profesionální notová osnova
+   - Používá knihovnu **neoscore** pro profesionální rendering s automatickými:
+     - Houslový klíč (treble clef)
+     - Předznamenání (křížky/béčka)
+     - Pomocné linky (ledger lines) pro noty mimo osnovu
+     - Notové hlavičky a vertikální akordy
+   - Pokud neoscore není dostupný, automaticky se použije Tkinter fallback
+   - Noty jsou optimalizovány pro čitelnost s kratší osnovou a většími notami
 
 ### Klávesové zkratky
 
@@ -272,6 +287,8 @@ Editujte `database.json` a přidejte novou položku:
 
 ## Plánované funkce
 
+- [x] **Training Mode**: Interaktivní trénink akordů a not s MIDI klaviaturou ✅
+- [x] **Music Staff Display**: Profesionální notová osnova pomocí neoscore ✅
 - [ ] **Ear Training Mode**: Cvičení rozpoznávání akordů poslechem
 - [ ] **Chord-Scale Visualization**: Zobrazení doporučených stupnic pro improvizaci
 - [ ] **Harmonic Function Coloring**: Barevné rozlišení tonic/subdominant/dominant
@@ -302,6 +319,7 @@ Pro otázky nebo návrhy na vylepšení prosím otevřete Issue na GitHubu.
 
 - Databáze obsahuje klasické jazzové standardy od autorů jako Duke Ellington, Bill Evans, John Coltrane, a další
 - Inspirováno jazzovou pedagogikou a teorií z knih jako "The Jazz Piano Book" (Mark Levine)
+- Notová osnova vykreslena pomocí knihovny [neoscore](https://github.com/DigiScore/neoscore) - profesionální notační knihovna pro Python
 
 ---
 
