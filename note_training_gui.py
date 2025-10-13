@@ -43,8 +43,8 @@ class NoteTrainingWindow:
         # Create window
         self.window = tk.Toplevel(parent_root)
         self.window.title("Training Mode - Note Recognition")
-        self.window.geometry("1300x900")
-        self.window.minsize(1040, 780)
+        self.window.geometry("1024x768")
+        self.window.minsize(800, 600)
 
         # Keyboard display
         self.keyboard_display: Optional[KeyboardDisplay] = None
