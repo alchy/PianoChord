@@ -157,7 +157,7 @@ class MusicStaffDisplay:
             neoscore.setup()
 
             # Create staff with treble clef
-            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(156))
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(200))
             clef.Clef(Mm(0), staff_obj, 'treble')
             logger.info("Staff and clef created")
 
@@ -170,7 +170,7 @@ class MusicStaffDisplay:
                     logger.info(f"  MIDI {midi_note} -> {pitch_str}")
 
                 # Create single Chordrest with all notes (they will be stacked vertically)
-                x_pos = Mm(40)  # Center position for chord
+                x_pos = Mm(55)  # Center position for chord
                 chordrest.Chordrest(
                     x_pos,
                     staff_obj,
@@ -215,7 +215,7 @@ class MusicStaffDisplay:
 
             # Create staff with treble clef
             # Staff constructor: (pos, parent, length, clef=None)
-            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(156))
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(200))
 
             # Add treble clef - create it as a child of the staff at position x=0
             clef.Clef(Mm(0), staff_obj, 'treble')
@@ -226,14 +226,14 @@ class MusicStaffDisplay:
                 sorted_notes = sorted(midi_notes)
 
                 # Calculate spacing based on number of notes
-                available_width = 104  # mm (30% larger)
+                available_width = 135  # mm (for 200mm staff)
                 if len(sorted_notes) > 1:
-                    note_spacing = min(20, available_width / len(sorted_notes))
+                    note_spacing = min(26, available_width / len(sorted_notes))
                 else:
-                    note_spacing = 13
+                    note_spacing = 17
 
                 # Starting position for notes (after clef)
-                start_x = 25
+                start_x = 30
 
                 for i, midi_note in enumerate(sorted_notes):
                     x_pos = Mm(start_x + (i * note_spacing))

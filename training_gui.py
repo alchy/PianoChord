@@ -43,8 +43,8 @@ class TrainingWindow:
         # Create window
         self.window = tk.Toplevel(parent_root)
         self.window.title("Training Mode - Chord Recognition")
-        self.window.geometry("1000x700")
-        self.window.minsize(800, 600)
+        self.window.geometry("1300x900")
+        self.window.minsize(1040, 780)
 
         # Keyboard display
         self.keyboard_display: Optional[KeyboardDisplay] = None
@@ -94,10 +94,10 @@ class TrainingWindow:
         staff_frame = ttk.LabelFrame(main_frame, text="Music Staff", padding=10)
         staff_frame.pack(fill=tk.X, pady=10)
 
-        staff_canvas = tk.Canvas(staff_frame, width=520, height=260, bg="white")
+        staff_canvas = tk.Canvas(staff_frame, width=680, height=340, bg="white")
         staff_canvas.pack()
 
-        self.staff_display = MusicStaffDisplay(staff_canvas, width=520, height=260)
+        self.staff_display = MusicStaffDisplay(staff_canvas, width=680, height=340)
         logger.info(f"[TRAINING] MusicStaffDisplay created, using neoscore: {self.staff_display.use_neoscore}")
         self.staff_display.draw_staff()
 
