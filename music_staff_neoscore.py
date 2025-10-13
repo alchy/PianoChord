@@ -156,8 +156,8 @@ class MusicStaffDisplay:
             # Initialize neoscore document
             neoscore.setup()
 
-            # Create staff with treble clef
-            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(200))
+            # Create staff with treble clef (shorter for better note visibility)
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(100))
             clef.Clef(Mm(0), staff_obj, 'treble')
             logger.info("Staff and clef created")
 
@@ -170,7 +170,7 @@ class MusicStaffDisplay:
                     logger.info(f"  MIDI {midi_note} -> {pitch_str}")
 
                 # Create single Chordrest with all notes (they will be stacked vertically)
-                x_pos = Mm(55)  # Center position for chord
+                x_pos = Mm(35)  # Center position for chord on shorter staff
                 chordrest.Chordrest(
                     x_pos,
                     staff_obj,
@@ -213,9 +213,9 @@ class MusicStaffDisplay:
             # Initialize neoscore document
             neoscore.setup()
 
-            # Create staff with treble clef
+            # Create staff with treble clef (shorter for better note visibility)
             # Staff constructor: (pos, parent, length, clef=None)
-            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(200))
+            staff_obj = staff.Staff((Mm(10), Mm(20)), None, Mm(100))
 
             # Add treble clef - create it as a child of the staff at position x=0
             clef.Clef(Mm(0), staff_obj, 'treble')
@@ -225,15 +225,15 @@ class MusicStaffDisplay:
             if midi_notes:
                 sorted_notes = sorted(midi_notes)
 
-                # Calculate spacing based on number of notes
-                available_width = 135  # mm (for 200mm staff)
+                # Calculate spacing based on number of notes (for 100mm staff)
+                available_width = 68  # mm (for 100mm staff, space after clef)
                 if len(sorted_notes) > 1:
-                    note_spacing = min(26, available_width / len(sorted_notes))
+                    note_spacing = min(13, available_width / len(sorted_notes))
                 else:
-                    note_spacing = 17
+                    note_spacing = 8
 
                 # Starting position for notes (after clef)
-                start_x = 30
+                start_x = 22
 
                 for i, midi_note in enumerate(sorted_notes):
                     x_pos = Mm(start_x + (i * note_spacing))
