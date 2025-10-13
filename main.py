@@ -9,6 +9,16 @@ Verze: 2.1
 
 import logging
 import sys
+import os
+
+# Fix DPI scaling issues on Windows (must be before any GUI imports)
+if sys.platform == 'win32':
+    try:
+        import ctypes
+        # Set DPI awareness to avoid scaling issues when mixing Tkinter and PyQt5
+        ctypes.windll.shcore.SetProcessDpiAwareness(1)  # PROCESS_SYSTEM_DPI_AWARE
+    except Exception:
+        pass  # Ignore errors on older Windows versions
 
 # Konfigurace logování
 logging.basicConfig(
