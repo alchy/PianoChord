@@ -245,7 +245,7 @@ class PianoChordAnalyzer:
         voicing_frame.pack(side=tk.LEFT, padx=10)
 
         self.voicing_var = tk.StringVar(value="root")
-        for text, value in [("Root", "root"), ("Smooth", "smooth"), ("Drop2", "drop2")]:
+        for text, value in [("Root", "root"), ("Smooth", "smooth"), ("Drop2", "drop2"), ("Evans", "evans")]:
             ttk.Radiobutton(voicing_frame, text=text, variable=self.voicing_var,
                             value=value, command=self.on_voicing_changed).pack(side=tk.LEFT, padx=2)
 

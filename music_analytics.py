@@ -184,6 +184,8 @@ class MusicAnalytics:
                 return self._get_smooth_voicing(root_midi)
             elif self.voicing_type == "drop2":
                 return self._get_drop2_voicing(root_midi)
+            elif self.voicing_type == "evans":
+                return self._get_evans_voicing(base_note, chord_type)
             else:
                 return root_midi
         except Exception as e:
@@ -226,6 +228,17 @@ class MusicAnalytics:
         second_highest_index = drop2_voicing.index(second_highest)
         drop2_voicing[second_highest_index] = second_highest - 12
         return sorted(drop2_voicing)
+
+    def _get_evans_voicing(self, base_note: str, chord_type: str) -> List[int]:
+        # Input: base_note (str), chord_type (str)
+        # Description: Evansův rootless voicing (bezzákladový, barevný 9/13) s
+        #   voice-leadingem z předchozího akordu. Logika v evans_bridge (motor).
+        # Output: List of MIDI notes.
+        # Called by: get_voicing
+        import evans_bridge
+        root_pc = config.PIANO_KEYS.index(base_note)
+        return evans_bridge.evans_voicing(
+            root_pc, chord_type, self.previous_chord_midi or None)
 
     def analyze_chord(self, chord_name: str) -> Dict:
         # Input: chord_name (str)
