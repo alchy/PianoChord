@@ -3,14 +3,16 @@
 Module for GUI components, including keyboard display and application interface.
 """
 
+import os
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import logging
 from typing import List, Tuple
 
 import config
 from music_analytics import MusicAnalytics
 from midi_playback import MidiPlayback
+import evans_bridge
 
 logger = logging.getLogger(__name__)
 
@@ -243,7 +245,7 @@ class PianoChordAnalyzer:
         voicing_frame.pack(side=tk.LEFT, padx=10)
 
         self.voicing_var = tk.StringVar(value="root")
-        for text, value in [("Root", "root"), ("Smooth", "smooth"), ("Drop2", "drop2")]:
+        for text, value in [("Root", "root"), ("Smooth", "smooth"), ("Drop2", "drop2"), ("Evans", "evans")]:
             ttk.Radiobutton(voicing_frame, text=text, variable=self.voicing_var,
                             value=value, command=self.on_voicing_changed).pack(side=tk.LEFT, padx=2)
 
@@ -356,6 +358,10 @@ class PianoChordAnalyzer:
         ttk.Button(nav_frame, text="Next >>", command=self.next_chord).pack(side=tk.LEFT, padx=5)
 
         ttk.Button(nav_frame, text="Play Sec Dom", command=self.play_secondary_dominant).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(nav_frame, text="Load from MIDI", command=self.load_from_midi).pack(side=tk.LEFT, padx=5)
+
+        ttk.Button(nav_frame, text="Evans aranž", command=self.generate_evans_arrangement).pack(side=tk.LEFT, padx=5)
 
         prog_frame = ttk.Frame(parent)
         prog_frame.grid(row=1, column=0, sticky="nsew", padx=10)
@@ -578,6 +584,77 @@ class PianoChordAnalyzer:
             self.keyboard_display.draw_chord(chords[0], self.midi_playback, auto_midi=self.midi_enabled_var.get())
 
         logger.info(f"Loaded progression from {song_name}: {len(chords)} chords")
+
+    def load_from_midi(self):
+        # Input: None
+        # Description: Načte libovolné MIDI a motorem dear-mister-evans z něj
+        #   vytáhne akordovou progresi do Progression Playeru.
+        # Output: None
+        # Called by: tlačítko "Load from MIDI" v create_progression_tab
+        path = filedialog.askopenfilename(
+            title="Vyber MIDI soubor",
+            filetypes=[("MIDI", "*.mid *.midi"), ("Vše", "*.*")])
+        if not path:
+            return
+        try:
+            data = evans_bridge.get_progression_from_midi(path, bars=32)
+        except Exception as e:
+            messagebox.showerror("Import z MIDI",
+                                 f"Nepodařilo se načíst progresi:\n{e}")
+            logger.error(f"Import z MIDI selhal: {e}")
+            return
+        chords = data.get("chords", [])
+        if not chords:
+            messagebox.showwarning("Import z MIDI", "Motor nevrátil žádné akordy.")
+            return
+        key = data.get("key", "")
+        key_root = key.split()[0] if key else "C"
+        try:
+            annotations = self.music_analytics.detect_secondary_dominants(chords, key_root)
+        except Exception:
+            annotations = [""] * len(chords)
+        self.music_analytics.current_progression = chords
+        self.music_analytics.current_annotations = annotations
+        self.music_analytics.current_index = 0
+        self.music_analytics.progression_source = data.get("source", os.path.basename(path))
+        self.update_progression_display()
+        self.keyboard_display.draw_chord(
+            chords[0], self.midi_playback, auto_midi=self.midi_enabled_var.get())
+        messagebox.showinfo(
+            "Import z MIDI",
+            f"Načteno {len(chords)} akordů.\nTónina: {key}\nZdroj: {data.get('source','')}")
+        logger.info(f"Načteno z MIDI {path}: {len(chords)} akordů, tónina {key}")
+
+    def generate_evans_arrangement(self):
+        # Input: None
+        # Description: Z aktuální progrese vyrobí motorem dear-mister-evans plnou
+        #   Evansovskou aranž (bas + comp + melodie), uloží a nabídne přehrání.
+        # Output: None
+        # Called by: tlačítko "Evans aranž" v create_progression_tab
+        chords = self.music_analytics.current_progression
+        if not chords:
+            messagebox.showinfo("Evans aranž",
+                                "Nejdřív načti progresi (Load from MIDI nebo z databáze).")
+            return
+        src = self.music_analytics.progression_source or "evans"
+        base = os.path.splitext(os.path.basename(str(src)))[0] or "evans"
+        out = filedialog.asksaveasfilename(
+            title="Ulož Evans aranž", defaultextension=".mid",
+            initialfile=f"{base}__evans.mid", filetypes=[("MIDI", "*.mid")])
+        if not out:
+            return
+        try:
+            path = evans_bridge.generate_arrangement(chords, out, bpm=110, melody=True)
+        except Exception as e:
+            messagebox.showerror("Evans aranž", f"Generování selhalo:\n{e}")
+            logger.error(f"Evans aranž selhala: {e}")
+            return
+        logger.info(f"Evans aranž uložena: {path}")
+        if messagebox.askyesno("Evans aranž", f"Uloženo:\n{path}\n\nPřehrát teď?"):
+            try:
+                evans_bridge.play_file(path)
+            except Exception as e:
+                messagebox.showerror("Přehrávání", str(e))
 
     def on_voicing_changed(self):
         # Input: None
