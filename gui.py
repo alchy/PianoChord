@@ -3,14 +3,16 @@
 Module for GUI components, including keyboard display and application interface.
 """
 
+import os
 import tkinter as tk
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, filedialog
 import logging
 from typing import List, Tuple
 
 import config
 from music_analytics import MusicAnalytics
 from midi_playback import MidiPlayback
+import evans_bridge
 
 logger = logging.getLogger(__name__)
 
@@ -357,6 +359,8 @@ class PianoChordAnalyzer:
 
         ttk.Button(nav_frame, text="Play Sec Dom", command=self.play_secondary_dominant).pack(side=tk.LEFT, padx=5)
 
+        ttk.Button(nav_frame, text="Load from MIDI", command=self.load_from_midi).pack(side=tk.LEFT, padx=5)
+
         prog_frame = ttk.Frame(parent)
         prog_frame.grid(row=1, column=0, sticky="nsew", padx=10)
         prog_frame.rowconfigure(0, weight=1)
@@ -578,6 +582,46 @@ class PianoChordAnalyzer:
             self.keyboard_display.draw_chord(chords[0], self.midi_playback, auto_midi=self.midi_enabled_var.get())
 
         logger.info(f"Loaded progression from {song_name}: {len(chords)} chords")
+
+    def load_from_midi(self):
+        # Input: None
+        # Description: Načte libovolné MIDI a motorem dear-mister-evans z něj
+        #   vytáhne akordovou progresi do Progression Playeru.
+        # Output: None
+        # Called by: tlačítko "Load from MIDI" v create_progression_tab
+        path = filedialog.askopenfilename(
+            title="Vyber MIDI soubor",
+            filetypes=[("MIDI", "*.mid *.midi"), ("Vše", "*.*")])
+        if not path:
+            return
+        try:
+            data = evans_bridge.get_progression_from_midi(path, bars=32)
+        except Exception as e:
+            messagebox.showerror("Import z MIDI",
+                                 f"Nepodařilo se načíst progresi:\n{e}")
+            logger.error(f"Import z MIDI selhal: {e}")
+            return
+        chords = data.get("chords", [])
+        if not chords:
+            messagebox.showwarning("Import z MIDI", "Motor nevrátil žádné akordy.")
+            return
+        key = data.get("key", "")
+        key_root = key.split()[0] if key else "C"
+        try:
+            annotations = self.music_analytics.detect_secondary_dominants(chords, key_root)
+        except Exception:
+            annotations = [""] * len(chords)
+        self.music_analytics.current_progression = chords
+        self.music_analytics.current_annotations = annotations
+        self.music_analytics.current_index = 0
+        self.music_analytics.progression_source = data.get("source", os.path.basename(path))
+        self.update_progression_display()
+        self.keyboard_display.draw_chord(
+            chords[0], self.midi_playback, auto_midi=self.midi_enabled_var.get())
+        messagebox.showinfo(
+            "Import z MIDI",
+            f"Načteno {len(chords)} akordů.\nTónina: {key}\nZdroj: {data.get('source','')}")
+        logger.info(f"Načteno z MIDI {path}: {len(chords)} akordů, tónina {key}")
 
     def on_voicing_changed(self):
         # Input: None
