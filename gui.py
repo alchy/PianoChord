@@ -361,6 +361,8 @@ class PianoChordAnalyzer:
 
         ttk.Button(nav_frame, text="Load from MIDI", command=self.load_from_midi).pack(side=tk.LEFT, padx=5)
 
+        ttk.Button(nav_frame, text="Evans aranž", command=self.generate_evans_arrangement).pack(side=tk.LEFT, padx=5)
+
         prog_frame = ttk.Frame(parent)
         prog_frame.grid(row=1, column=0, sticky="nsew", padx=10)
         prog_frame.rowconfigure(0, weight=1)
@@ -622,6 +624,37 @@ class PianoChordAnalyzer:
             "Import z MIDI",
             f"Načteno {len(chords)} akordů.\nTónina: {key}\nZdroj: {data.get('source','')}")
         logger.info(f"Načteno z MIDI {path}: {len(chords)} akordů, tónina {key}")
+
+    def generate_evans_arrangement(self):
+        # Input: None
+        # Description: Z aktuální progrese vyrobí motorem dear-mister-evans plnou
+        #   Evansovskou aranž (bas + comp + melodie), uloží a nabídne přehrání.
+        # Output: None
+        # Called by: tlačítko "Evans aranž" v create_progression_tab
+        chords = self.music_analytics.current_progression
+        if not chords:
+            messagebox.showinfo("Evans aranž",
+                                "Nejdřív načti progresi (Load from MIDI nebo z databáze).")
+            return
+        src = self.music_analytics.progression_source or "evans"
+        base = os.path.splitext(os.path.basename(str(src)))[0] or "evans"
+        out = filedialog.asksaveasfilename(
+            title="Ulož Evans aranž", defaultextension=".mid",
+            initialfile=f"{base}__evans.mid", filetypes=[("MIDI", "*.mid")])
+        if not out:
+            return
+        try:
+            path = evans_bridge.generate_arrangement(chords, out, bpm=110, melody=True)
+        except Exception as e:
+            messagebox.showerror("Evans aranž", f"Generování selhalo:\n{e}")
+            logger.error(f"Evans aranž selhala: {e}")
+            return
+        logger.info(f"Evans aranž uložena: {path}")
+        if messagebox.askyesno("Evans aranž", f"Uloženo:\n{path}\n\nPřehrát teď?"):
+            try:
+                evans_bridge.play_file(path)
+            except Exception as e:
+                messagebox.showerror("Přehrávání", str(e))
 
     def on_voicing_changed(self):
         # Input: None

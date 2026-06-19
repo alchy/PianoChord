@@ -51,6 +51,42 @@ def get_progression_from_midi(midi_path, bars=32, keep_repeats=False):
     return data
 
 
+def _engine_script_named(name):
+    return os.path.join(ENGINE_DIR, "improved", name)
+
+
+def generate_arrangement(chords, out_path, bpm=110, melody=True, seed=1):
+    """Z akordů (list značek) vyrobí plnou Evansovskou aranž a uloží do out_path.
+    Vrátí cestu k souboru, nebo vyhodí RuntimeError."""
+    script = _engine_script_named("arrange_chords.py")
+    if not os.path.exists(script):
+        raise RuntimeError(f"Motor nenalezen: {script}\n"
+                           "Nastav EVANS_ENGINE_DIR.")
+    cmd = [_engine_python(), script, "--chords", " | ".join(chords),
+           "--out", out_path, "--bpm", str(bpm), "--seed", str(seed)]
+    if not melody:
+        cmd.append("--no-melody")
+    env = dict(os.environ, PYTHONUTF8="1", PYTHONIOENCODING="utf-8")
+    proc = subprocess.run(cmd, capture_output=True, text=True,
+                          encoding="utf-8", env=env, timeout=120)
+    out = (proc.stdout or "").strip()
+    if not out:
+        raise RuntimeError((proc.stderr or "Motor nevrátil výstup.").strip())
+    data = json.loads(out.splitlines()[-1])
+    if "error" in data:
+        raise RuntimeError(data["error"])
+    return data["output"]
+
+
+def play_file(path):
+    """Přehraje MIDI soubor do loopMIDI přes player motoru. Neblokuje (Popen)."""
+    script = _engine_script_named("player.py")
+    if not os.path.exists(script):
+        raise RuntimeError(f"Player nenalezen: {script}")
+    env = dict(os.environ, PYTHONUTF8="1")
+    return subprocess.Popen([_engine_python(), script, path], env=env)
+
+
 # ===========================================================================
 # Evansovy rootless voicingy (čistě stdlib port z dear-mister-evans/voicings.py)
 # Pro typ voicingu "Evans" v PianoChordu. Voice-leading z předchozího akordu.
